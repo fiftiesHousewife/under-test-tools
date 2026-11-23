@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The tool's messages go to the console as plain lines; the symbol solver's own logging is kept quiet. -->
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="console" target="SYSTEM_ERR">
+            <PatternLayout pattern="%msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.github.fiftieshousewife.undertesttools" level="info"/>
+        <Root level="warn">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>

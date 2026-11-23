@@ -1,0 +1,10 @@
+# Project-specific forbidden APIs, on top of the bundled JDK signature sets. See AGENTS.md.
+@defaultMessage Use Lombok @Slf4j (SLF4J API, Log4j 2 at run time) for logging
+java.util.logging.Logger
+java.util.logging.Logger#getLogger(java.lang.String)
+@defaultMessage Inject a java.time.Clock so tests can control time
+java.time.LocalDate#now()
+java.time.LocalDateTime#now()
+java.time.Instant#now()
+java.time.ZonedDateTime#now()
+java.lang.System#currentTimeMillis()

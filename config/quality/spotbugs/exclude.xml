@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Findings this project doesn't treat as bugs, each with its reason. -->
+<FindBugsFilter>
+    <!-- The tool logs to the console of the person running it, not to a log file another system reads, so a line
+         break in a logged path or message can't forge a log entry. -->
+    <Match>
+        <Bug pattern="CRLF_INJECTION_LOGS"/>
+    </Match>
+</FindBugsFilter>

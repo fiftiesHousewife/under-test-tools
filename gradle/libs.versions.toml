@@ -1,0 +1,57 @@
+# One catalogue for the whole repository. build-logic reads it with from(files("../gradle/libs.versions.toml")).
+
+[versions]
+java = "25"
+junit = "6.1.3"
+assertj = "3.27.7"
+lombok = "1.18.48"
+slf4j = "2.0.20"
+log4j = "2.26.1"
+jackson3 = "3.3.0"
+javaparser = "3.28.2"
+json-schema-validator = "3.0.9"
+
+# Quality tools
+jacoco = "0.8.16"
+checkstyle = "14.4.0"
+pmd = "7.29.0"
+spotbugs = "4.10.5"
+findsecbugs = "1.14.0"
+pitest = "1.30.2"
+pitest-junit5 = "1.2.3"
+# Smallest line coverage a project may have; a project can raise it with quality.minLineCoverage.
+min-line-coverage = "0.80"
+
+# Gradle plugins applied by build-logic
+gradle-pitest-plugin = "1.19.0"
+gradle-spotbugs-plugin = "6.5.13"
+gradle-forbiddenapis-plugin = "3.11"
+gradle-versions-plugin = "0.67.0"
+# Publishing: Maven Central through its Central Portal, and a CycloneDX bill of materials
+nmcp = "1.6.2"
+cyclonedx = "3.6.1"
+
+[libraries]
+spotbugs-annotations = { module = "com.github.spotbugs:spotbugs-annotations", version.ref = "spotbugs" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+log4j-slf4j2-impl = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j" }
+findsecbugs = { module = "com.h3xstream.findsecbugs:findsecbugs-plugin", version.ref = "findsecbugs" }
+json-schema-validator = { module = "com.networknt:json-schema-validator", version.ref = "json-schema-validator" }
+jackson3-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson3" }
+jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3" }
+javaparser-core = { module = "com.github.javaparser:javaparser-core", version.ref = "javaparser" }
+pmd-java = { module = "net.sourceforge.pmd:pmd-java", version.ref = "pmd" }
+
+# Gradle plugins, as ordinary dependencies of build-logic
+gradle-pitest-plugin = { module = "info.solidsoft.gradle.pitest:gradle-pitest-plugin", version.ref = "gradle-pitest-plugin" }
+gradle-spotbugs-plugin = { module = "com.github.spotbugs.snom:spotbugs-gradle-plugin", version.ref = "gradle-spotbugs-plugin" }
+gradle-forbiddenapis-plugin = { module = "de.thetaphi:forbiddenapis", version.ref = "gradle-forbiddenapis-plugin" }
+gradle-versions-plugin = { module = "io.github.ben-manes:gradle-versions-plugin", version.ref = "gradle-versions-plugin" }
+gradle-nmcp-plugin = { module = "com.gradleup.nmcp:nmcp", version.ref = "nmcp" }
+gradle-cyclonedx-plugin = { module = "org.cyclonedx:cyclonedx-gradle-plugin", version.ref = "cyclonedx" }

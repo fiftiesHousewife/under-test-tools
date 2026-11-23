@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<!-- The toolkit's PMD rules for anti-patterns in existing Java tests, run by the find-test-anti-patterns skill:
+     pmd check -d <test folders> -R <this file> -f csv. Each rule's name starts with the anti-pattern kind it finds.
+     Reads code only; runs nothing. -->
+<ruleset name="Test anti-patterns" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>Anti-patterns in existing tests, for the find-test-anti-patterns skill.</description>
+
+  <!-- PMD's own rules -->
+  <rule name="no_real_assertion__NoAssertion" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="The test has no assertion: no assert, verify, check, expect, fail or should call, and no call to a method in its class that asserts">
+    <!-- A helper in another class counts only by its name (checkTotals, verifyOrder, assertValid...): one file is read at a time. -->
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration
+  [ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest')][not(.//MemberValuePair[@Name='expected'])]
+   or (starts-with(@Name,'test') and @Visibility='public' and not(ModifierList/Annotation)
+       and ancestor::ClassDeclaration[1]/ExtendsList/ClassType[@SimpleName=('TestCase','AbstractDependencyInjectionSpringContextTests',
+         'AbstractTransactionalSpringContextTests','AbstractTransactionalDataSourceSpringContextTests','AbstractSpringContextTests',
+         'AbstractJpaTests','AbstractJUnit38SpringContextTests','AbstractTransactionalJUnit38SpringContextTests')])]
+  [not(.//MethodCall[matches(@MethodName,'^(assert|verify|check|expect|fail|should|andExpect|then)')])]
+  [not(.//MethodCall[@MethodName = ancestor::ClassBody[1]/MethodDeclaration
+      [.//MethodCall[matches(@MethodName,'^(assert|verify|check|expect|fail|should|andExpect)')]]/@Name])]
+]]></value></property></properties>
+  </rule>
+  <rule ref="category/java/errorprone.xml/EmptyCatchBlock" name="swallows_failures__EmptyCatch"/>
+
+  <!-- The toolkit's own rules -->
+  <rule name="disabled__Ignored" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="A test, or its whole class, marked @Ignore or @Disabled">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration[ModifierList/Annotation[@SimpleName=('Ignore','Disabled')]]
+  [ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest','TestFactory')]]
+| //ClassDeclaration[ModifierList/Annotation[@SimpleName=('Ignore','Disabled')]]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="never_runs__IgnoredWithoutTest" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="Marked @Ignore or @Disabled but has no test annotation: it never runs">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration[ModifierList/Annotation[@SimpleName=('Ignore','Disabled')]]
+  [not(ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest','TestFactory')])]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="never_runs__DetachedTest" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="Looks like a test but has no test annotation, isn't a JUnit 3 test, and nothing in its class calls it: it never runs">
+    <!-- A class extending TestCase, or one of Spring's JUnit 3 base classes, runs test...() methods without @Test. A
+         superclass inside the repo can't be seen here: the skill checks each hit's superclasses before counting it. -->
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//ClassDeclaration[not(ExtendsList/ClassType[@SimpleName=('TestCase','AbstractDependencyInjectionSpringContextTests',
+    'AbstractTransactionalSpringContextTests','AbstractTransactionalDataSourceSpringContextTests','AbstractSpringContextTests',
+    'AbstractJpaTests','AbstractJUnit38SpringContextTests','AbstractTransactionalJUnit38SpringContextTests','GroovyTestCase',
+    'MockObjectTestCase')])]
+  [.//MethodDeclaration/ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest','TestFactory')]
+   or ends-with(@SimpleName,'Test') or ends-with(@SimpleName,'Tests') or ends-with(@SimpleName,'TestCase')]
+  /ClassBody/MethodDeclaration[@Visibility='public'][@Void=true()][count(FormalParameters/*)=0]
+  [starts-with(@Name,'test') or ../MethodDeclaration/ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest','TestFactory')]]
+  [not(ModifierList/Annotation)]
+  [not(@Name=('setUp','tearDown','main'))]
+  [not(@Name = ancestor::ClassBody//MethodCall/@MethodName)]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="never_runs__JupiterSilentSkip" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="A JUnit 5 or 6 test that is private, static or returns a value: JUnit skips it without a word">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration[ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest')]]
+  [ancestor::CompilationUnit/ImportDeclaration[starts-with(@ImportedName,'org.junit.jupiter')]]
+  [@Visibility='private' or @Static=true() or not(@Void=true())]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="swallows_failures__CatchesAssertionError" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="A test catches AssertionError, Error or Throwable, which swallows its own failures">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//CatchClause[CatchParameter//ClassType[@SimpleName=('AssertionError','AssertionFailedError','Error','Throwable')]]
+  [not(Block//AssignmentExpression)][not(Block//ThrowStatement)][not(Block//MethodCall[@MethodName='fail'])]
+  [ancestor::MethodDeclaration[ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest','TestFactory')]]]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="no_real_assertion__BareAssertThatOrVerify" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="assertThat(x) or verify(mock) with nothing after it checks nothing">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//ExpressionStatement/MethodCall[@MethodName=('assertThat','verify')][count(ArgumentList/*)=1]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="no_real_assertion__WeakAssertionsOnly" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="The test's only assertions are assertNotNull, isNotNull or assertTrue(true)">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodDeclaration[ModifierList/Annotation[@SimpleName=('Test','ParameterizedTest','RepeatedTest')]]
+  [.//MethodCall[@MethodName=('assertNotNull','isNotNull') or (@MethodName='assertTrue' and ArgumentList/BooleanLiteral)]]
+  [not(.//MethodCall[(starts-with(@MethodName,'assert') and not(@MethodName=('assertNotNull','assertTrue','assertThat'))) or @MethodName=('fail','verify','assertThrows')])]
+  [not(.//MethodCall[@MethodName='assertTrue'][not(ArgumentList/BooleanLiteral)])]
+  [not(.//MethodCall[@MethodName='assertThat'][parent::MethodCall or count(ArgumentList/*)>1])]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="no_real_assertion__ExpectedAnyException" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="@Test(expected = Exception.class or Throwable.class) passes whatever goes wrong">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//Annotation[@SimpleName='Test']//MemberValuePair[@Name='expected']//ClassType[@SimpleName=('Exception','Throwable')]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="sleeps__Sleep" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="Thread.sleep or TimeUnit sleep in test code">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//MethodCall[@MethodName='sleep'][TypeExpression/ClassType[@SimpleName='Thread'] or FieldAccess[TypeExpression/ClassType[@SimpleName='TimeUnit']]]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="order_dependent__FixedOrder" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="The class fixes the order its tests run in">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//ClassDeclaration[ModifierList/Annotation[@SimpleName=('FixMethodOrder','TestMethodOrder')]]
+]]></value></property></properties>
+  </rule>
+
+  <rule name="mocks_everything__FiveOrMoreMocks" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"
+        message="The class has five or more mocks">
+    <priority>3</priority>
+    <properties><property name="xpath"><value><![CDATA[
+//ClassDeclaration[count(.//FieldDeclaration[ModifierList/Annotation[@SimpleName=('Mock','MockBean')]]) + count(.//MethodCall[@MethodName='mock']) >= 5]
+]]></value></property></properties>
+  </rule>
+</ruleset>

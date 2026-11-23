@@ -1,0 +1,9 @@
+under-test-tools
+Copyright The under-test contributors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE). The licence covers everything in this
+repository: code, tools, decision guides and technique rules. The lessons and their videos, in their own repository
+(under-test-lessons), use the same licence.
+
+Third-party material:
+- Decision record format based on MADR (Markdown Architectural Decision Records), https://adr.github.io/madr/

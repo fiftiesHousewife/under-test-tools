@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="under-test"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>
+        Rules for this repository: the cleancode plugin's curated rule, complexity limits, and the test standard
+        that a test with more than one assertion wraps them in assertAll. See AGENTS.md.
+    </description>
+
+    <rule ref="category/java/errorprone.xml/AvoidFieldNameMatchingMethodName"/>
+
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="10"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/CognitiveComplexity">
+        <properties>
+            <property name="reportLevel" value="15"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml/NPathComplexity"/>
+    <rule ref="category/java/design.xml/ExcessiveParameterList">
+        <properties>
+            <property name="minimum" value="4"/>
+        </properties>
+    </rule>
+
+    <rule name="MultipleAssertionsMustUseAssertAll"
+          language="java"
+          message="A test with more than one assertion must wrap them in assertAll(...), so every failure is reported"
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            A test method with two or more assertion statements stops at the first failure and hides the others.
+            Wrap them in org.junit.jupiter.api.Assertions.assertAll. Counts JUnit assert* calls and AssertJ
+            assertThat(...) chains.
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+//MethodDeclaration[ModifierList/Annotation[@SimpleName = ('Test', 'ParameterizedTest', 'RepeatedTest', 'Property', 'Example')]]
+  [count(Block/ExpressionStatement[
+      MethodCall[@MethodName != 'assertAll']
+                [starts-with(@MethodName, 'assert') or .//MethodCall[starts-with(@MethodName, 'assert')]]
+  ]) > 1]
+                ]]></value>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
