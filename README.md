@@ -1,5 +1,9 @@
 # under-test-tools
 
+[![build](https://github.com/fiftiesHousewife/under-test-tools/actions/workflows/build.yml/badge.svg)](https://github.com/fiftiesHousewife/under-test-tools/actions/workflows/build.yml)
+[![runs on: Java 17+](https://img.shields.io/badge/runs%20on-Java%2017%2B-blue)](#building)
+[![licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
+
 **The mechanical steps of [under-test](https://github.com/fiftiesHousewife/under-test)'s journey: the parts a program
 can decide the same way every time, one sub-command each, so its AI assistant skills keep only the judgement.**
 
