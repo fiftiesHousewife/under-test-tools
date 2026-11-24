@@ -1,5 +1,5 @@
 // under-test-tools: the mechanical steps of under-test's journey, one sub-command each. The code standards come from
-// build-logic's java-conventions; see AGENTS.md.
+// the java-conventions plugin; see AGENTS.md.
 
 plugins {
     id("io.github.fiftieshousewife.java-conventions")
@@ -36,6 +36,3 @@ val allInOne = tasks.register<Jar>("allInOneJar") {
 }
 tasks.assemble { dependsOn(allInOne) }
 
-tasks.withType<com.github.spotbugs.snom.SpotBugsTask>().configureEach {
-    excludeFilter = layout.projectDirectory.file("config/quality/spotbugs/exclude.xml")
-}

@@ -9,7 +9,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Every class and method in the test folders, with their lines, read without resolving types. A JUnit 3 test is a
@@ -44,7 +42,7 @@ public final class SourceIndex {
         final List<ClassInfo> found = new ArrayList<>();
         int failed = 0;
         for (final String folder : folders) {
-            for (final Path file : javaFiles(repo.resolve(folder))) {
+            for (final Path file : FilesEndingIn.under(repo.resolve(folder), ".java")) {
                 final String name = repo.relativize(file).toString().replace('\\', '/');
                 final Optional<CompilationUnit> unit = parse(parser, file);
                 if (unit.isEmpty()) {
@@ -88,16 +86,6 @@ public final class SourceIndex {
         return Junit3.extendsBase(type, bySimpleName);
     }
 
-    private static List<Path> javaFiles(final Path folder) {
-        if (!Files.isDirectory(folder)) {
-            return List.of();
-        }
-        try (Stream<Path> files = Files.walk(folder)) {
-            return files.filter(p -> p.toString().endsWith(".java")).sorted().toList();
-        } catch (IOException e) {
-            throw new UncheckedIOException("Can't read " + folder, e);
-        }
-    }
 
     private static Optional<CompilationUnit> parse(final JavaParser parser, final Path file) {
         try {

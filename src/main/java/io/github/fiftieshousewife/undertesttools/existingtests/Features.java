@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 // Cucumber scenarios as tests: each scenario, and each row of a scenario outline's examples (not its heading row). A
 // scenario is disabled when it or its feature has the tag @ignore or @disabled, in any case.
@@ -31,7 +30,7 @@ final class Features {
     static List<Scenario> read(final Path repo, final List<String> folders) {
         final List<Scenario> scenarios = new ArrayList<>();
         for (final String folder : folders) {
-            for (final Path file : featureFiles(repo.resolve(folder))) {
+            for (final Path file : FilesEndingIn.under(repo.resolve(folder), ".feature")) {
                 scenarios.addAll(scenarios(repo.relativize(file).toString().replace('\\', '/'), lines(file)));
             }
         }
@@ -111,16 +110,6 @@ final class Features {
         state.headingSeen = true;
     }
 
-    private static List<Path> featureFiles(final Path folder) {
-        if (!Files.isDirectory(folder)) {
-            return List.of();
-        }
-        try (Stream<Path> files = Files.walk(folder)) {
-            return files.filter(p -> p.toString().endsWith(".feature")).sorted().toList();
-        } catch (IOException e) {
-            throw new UncheckedIOException("Can't read " + folder, e);
-        }
-    }
 
     private static List<String> lines(final Path file) {
         try {
