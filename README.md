@@ -1,6 +1,6 @@
 # under-test-tools
 
-[![build](https://github.com/fiftiesHousewife/under-test-tools/actions/workflows/build.yml/badge.svg)](https://github.com/fiftiesHousewife/under-test-tools/actions/workflows/build.yml)
+[![build](https://img.shields.io/github/actions/workflow/status/fiftiesHousewife/under-test-tools/build.yml?branch=main&label=build)](https://github.com/fiftiesHousewife/under-test-tools/actions/workflows/build.yml)
 [![runs on: Java 17+](https://img.shields.io/badge/runs%20on-Java%2017%2B-blue)](#building)
 [![licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
 
