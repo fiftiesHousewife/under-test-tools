@@ -24,9 +24,11 @@ text, things referred to by name.
 
 ## Code standards (enforced by `./gradlew check`)
 The same as under-test's: at least 80% line coverage; no more than three parameters; no record with more than three
-components; a test with more than one assertion wraps them in `assertAll`; logging through Lombok `@Slf4j`; no
-forbidden JDK APIs; short, simple methods; no copy-pasted code; SpotBugs with FindSecBugs clean; final locals, braces
-always, no star imports; lines of 120 characters or fewer. Built with Java 25, runs on Java 17.
+components; one assertion statement per test, or one `assertAll`; logging through Lombok `@Slf4j`; no forbidden JDK
+APIs; methods of 20 lines or fewer, cyclomatic complexity 5 or less and cognitive complexity 6 or less; files of 150
+lines or fewer; no comment on a field; Javadoc only on public API; no copy-pasted code; SpotBugs with FindSecBugs
+clean; final locals, braces always, no star imports; lines of 120 characters or fewer. For-each loops are reported by
+`pmdAdvice`, never failing the build. Built with Java 25, runs on Java 17.
 
 ## Before you finish
 Run `./gradlew check`. It must pass.
