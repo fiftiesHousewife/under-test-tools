@@ -36,16 +36,10 @@ public final class Main {
 
     static int run(final List<String> args) {
         if (args.isEmpty() || "--help".equals(args.get(0))) {
-            log.info(USAGE);
-            return args.isEmpty() ? WRONG_ARGUMENTS : OK;
+            return help(args.isEmpty());
         }
-        final List<String> rest = args.subList(1, args.size());
         try {
-            if ("anti-patterns".equals(args.get(0))) {
-                return AntiPatternsCommand.run(rest);
-            }
-            log.error("Unknown step {}\n\n{}", args.get(0), USAGE);
-            return WRONG_ARGUMENTS;
+            return step(args.get(0), args.subList(1, args.size()));
         } catch (IllegalArgumentException e) {
             log.error("{}", e.getMessage());
             return WRONG_ARGUMENTS;
@@ -53,5 +47,18 @@ public final class Main {
             log.error("{}", e.getMessage());
             return FAILED;
         }
+    }
+
+    private static int help(final boolean noStep) {
+        log.info(USAGE);
+        return noStep ? WRONG_ARGUMENTS : OK;
+    }
+
+    private static int step(final String name, final List<String> rest) {
+        if ("anti-patterns".equals(name)) {
+            return AntiPatternsCommand.run(rest);
+        }
+        log.error("Unknown step {}\n\n{}", name, USAGE);
+        return WRONG_ARGUMENTS;
     }
 }

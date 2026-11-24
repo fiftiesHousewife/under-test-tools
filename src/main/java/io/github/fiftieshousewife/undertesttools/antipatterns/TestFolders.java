@@ -41,15 +41,18 @@ public final class TestFolders {
     public static TestFolders of(final Path repo, final String module) {
         final Path moduleDir = module.isEmpty() ? repo : repo.resolve(module);
         final String builds = buildFiles(repo, moduleDir);
-        final boolean maven = !Files.exists(moduleDir.resolve("build.gradle"))
-            && !Files.exists(moduleDir.resolve("build.gradle.kts")) && Files.exists(moduleDir.resolve("pom.xml"));
-        final List<Folder> found = new ArrayList<>();
-        for (final Path source : sourceFolders(moduleDir)) {
+        final boolean maven = isMaven(moduleDir);
+        final List<Folder> found = sourceFolders(moduleDir).stream().map(source -> {
             final String name = source.getName(source.getNameCount() - 2).toString();
-            final String path = repo.relativize(source).toString().replace('\\', '/');
-            found.add(new Folder(path, "test".equals(name) || named(builds, name, maven)));
-        }
+            return new Folder(repo.relativize(source).toString().replace('\\', '/'),
+                "test".equals(name) || named(builds, name, maven));
+        }).toList();
         return new TestFolders(found, maven, maven ? patternsIn(builds) : List.of());
+    }
+
+    private static boolean isMaven(final Path moduleDir) {
+        return !Files.exists(moduleDir.resolve("build.gradle")) && !Files.exists(moduleDir.resolve("build.gradle.kts"))
+            && Files.exists(moduleDir.resolve("pom.xml"));
     }
 
     public List<Folder> getFolders() {

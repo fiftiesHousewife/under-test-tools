@@ -7,7 +7,10 @@
   and the standards in AGENTS.md added:
   - no more than three parameters for any method or constructor (use a Lombok @Builder instead);
   - no more than three components in a record (use a Lombok @Builder class instead of a large record);
-  - complexity limits.
+  - complexity limits;
+  - Javadoc only on a public type, and on a public member of one;
+  - no comment on a field: a field's name says what it is, and what needs saying goes on the class or method;
+  - no method longer than 20 lines, not counting blank ones, and no file longer than 150 lines.
 -->
 <module name="Checker">
     <property name="severity" value="error"/>
@@ -30,16 +33,30 @@
             <property name="max" value="3"/>
         </module>
         <module name="CyclomaticComplexity">
-            <property name="max" value="10"/>
+            <property name="max" value="6"/>
         </module>
         <module name="NPathComplexity">
-            <property name="max" value="200"/>
+            <property name="max" value="50"/>
         </module>
         <module name="BooleanExpressionComplexity">
             <property name="max" value="3"/>
         </module>
         <module name="MethodLength">
-            <property name="max" value="50"/>
+            <property name="max" value="20"/>
+            <property name="countEmpty" value="false"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+        <module name="MatchXpath">
+            <property name="query" value="//OBJBLOCK/VARIABLE_DEF[MODIFIERS//BLOCK_COMMENT_BEGIN
+                or MODIFIERS//SINGLE_LINE_COMMENT or TYPE//BLOCK_COMMENT_BEGIN or TYPE//SINGLE_LINE_COMMENT]"/>
+            <message key="matchxpath.match"
+                value="A field has no comment: name it so it needs none, or say it on the class or method."/>
+        </module>
+        <module name="MatchXpath">
+            <property name="id" value="JavadocOnlyWhenPublic"/>
+            <property name="query" value="//*[self::CLASS_DEF or self::INTERFACE_DEF or self::ENUM_DEF or self::RECORD_DEF or self::ANNOTATION_DEF or self::METHOD_DEF or self::CTOR_DEF or self::COMPACT_CTOR_DEF][./*[not(self::OBJBLOCK or self::SLIST)]//BLOCK_COMMENT_BEGIN[starts-with(COMMENT_CONTENT/@text, '*')]][not(MODIFIERS/LITERAL_PUBLIC or parent::OBJBLOCK/parent::INTERFACE_DEF) or ancestor::*[self::CLASS_DEF or self::INTERFACE_DEF or self::ENUM_DEF or self::RECORD_DEF or self::ANNOTATION_DEF][not(MODIFIERS/LITERAL_PUBLIC or parent::OBJBLOCK/parent::INTERFACE_DEF)]]"/>
+            <message key="matchxpath.match"
+                value="Javadoc goes only on a public type and its public members: say it in a // comment, or not at all."/>
         </module>
         <module name="SuppressionXpathSingleFilter">
             <property name="checks" value="MethodLength|ParameterNumber"/>
@@ -47,7 +64,7 @@
         </module>
     </module>
     <module name="FileLength">
-        <property name="max" value="300"/>
+        <property name="max" value="150"/>
     </module>
     <module name="LineLength">
         <property name="max" value="120"/>

@@ -37,7 +37,7 @@ val libs = the<VersionCatalogsExtension>().named("libs")
 fun version(alias: String) = libs.findVersion(alias).get().requiredVersion
 fun library(alias: String) = libs.findLibrary(alias).get()
 val qualityConfig = rootProject.layout.projectDirectory.dir("config/quality")
-
+val ADVICE = "pmdAdvice"
 // ---------- Settings an organisation can change ----------
 fun fileProperty(name: String) = providers.gradleProperty(name).map { rootProject.layout.projectDirectory.file(it) }
 val underTest = extensions.create<UnderTestExtension>("underTest").apply {
@@ -166,11 +166,29 @@ pmd {
 }
 
 tasks.withType<Pmd>().configureEach {
-    useRuleFile(underTest.pmdRuleset, qualityConfig.file("pmd/ruleset.xml"), "pmdRuleset") { ruleSetFiles = files(it) }
+    if (name != ADVICE) {
+        useRuleFile(underTest.pmdRuleset, qualityConfig.file("pmd/ruleset.xml"), "pmdRuleset") { ruleSetFiles = files(it) }
+    }
     // The JDK's own classes, from the toolchain, so PMD resolves types against Java 25 instead of guessing.
     val jdkClasses = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(version("java")) }
         .map { it.metadata.installationPath.file("lib/jrt-fs.jar") }
     classpath = (classpath ?: files()).plus(files(jdkClasses))
+}
+
+// ---------- Advice: PMD rules that are reported but don't fail the build, such as preferring streams to loops ----------
+val adviceSources = extensions.getByType<SourceSetContainer>()
+val pmdAdvice = tasks.register<Pmd>(ADVICE) {
+    group = "verification"
+    description = "Reports, without failing the build, what config/quality/pmd/advice.xml advises."
+    source(adviceSources["main"].allJava, adviceSources["test"].allJava)
+    classpath = adviceSources["test"].runtimeClasspath
+    ruleSetFiles = files(qualityConfig.file("pmd/advice.xml"))
+    ignoreFailures = true
+    reports.html.outputLocation = layout.buildDirectory.file("reports/pmd/advice.html")
+    reports.xml.outputLocation = layout.buildDirectory.file("reports/pmd/advice.xml")
+}
+tasks.check {
+    dependsOn(pmdAdvice)
 }
 
 // ---------- Copy-paste detection: PMD's own CPD, run directly (no extra plugin to mirror) ----------

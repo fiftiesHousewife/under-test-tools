@@ -12,11 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * Writes the {@code anti_patterns} section of {@code testing/assessment.yaml} from {@code testing/tests.yaml}, and
- * proposes a decision for each finding. The file is edited as text: other sections, and the first line, stay as they
- * are.
- */
+// Writes the anti_patterns section of testing/assessment.yaml from testing/tests.yaml, and proposes a decision for each
+// finding. The file is edited as text: other sections, and the first line, stay as they are.
 final class AssessmentFile {
 
     static final String DEFAULT_SCHEMA =
@@ -33,31 +30,31 @@ final class AssessmentFile {
         }
     }
 
-    /** Works the findings out from the entries of testing/tests.yaml. */
+    // Works the findings out from the entries of testing/tests.yaml.
     static List<Summary> summarise(final Map<String, Object> testsYaml) {
         final Map<String, List<String>> atsByKind = new TreeMap<>();
-        for (final Object item : testsYaml.get("tests") instanceof List<?> l ? l : List.of()) {
-            if (item instanceof Map<?, ?> entry && entry.get("anti_patterns") instanceof Map<?, ?> found) {
-                final Object kinds = found.get("kinds");
-                for (final Object kind : kinds instanceof List<?> k ? k : List.of()) {
-                    atsByKind.computeIfAbsent(String.valueOf(kind), x -> new ArrayList<>())
-                        .add(String.valueOf(entry.get("at")));
-                }
-            }
-        }
-        final List<Summary> findings = new ArrayList<>();
-        atsByKind.forEach((kind, ats) -> findings.add(new Summary(kind, ats.size(),
-            ats.stream().sorted(BY_PATH_THEN_LINE).limit(3).toList())));
-        return findings;
+        entries(testsYaml).forEach(entry -> kinds(entry).forEach(kind ->
+            atsByKind.computeIfAbsent(kind, x -> new ArrayList<>()).add(String.valueOf(entry.get("at")))));
+        return atsByKind.entrySet().stream().map(e -> new Summary(e.getKey(), e.getValue().size(),
+            e.getValue().stream().sorted(BY_PATH_THEN_LINE).limit(3).toList())).toList();
     }
 
-    /** By path in byte order, then by line as a number. */
+    private static List<Map<?, ?>> entries(final Map<String, Object> testsYaml) {
+        return testsYaml.get("tests") instanceof List<?> list
+            ? list.stream().filter(Map.class::isInstance).<Map<?, ?>>map(Map.class::cast).toList() : List.of();
+    }
+
+    private static List<String> kinds(final Map<?, ?> entry) {
+        return entry.get("anti_patterns") instanceof Map<?, ?> found && found.get("kinds") instanceof List<?> kinds
+            ? kinds.stream().map(String::valueOf).toList() : List.of();
+    }
+
     static final Comparator<String> BY_PATH_THEN_LINE = Comparator
         .comparing((String at) -> at.substring(0, at.lastIndexOf(':')))
         .thenComparingInt(at -> Integer.parseInt(at.substring(at.lastIndexOf(':') + 1)));
 
     static void update(final Path file, final String section, final String repoName) {
-        String text = Files.exists(file) ? TestsFile.read(file)
+        String text = Files.exists(file) ? YamlFile.read(file)
             : "# yaml-language-server: $schema=" + DEFAULT_SCHEMA + "\nschema: assessment/1\nrepo: {name: "
                 + YamlText.scalar(repoName) + "}\n";
         text = replaceSection(text, "anti_patterns", section);
@@ -83,7 +80,7 @@ final class AssessmentFile {
         return out.toString();
     }
 
-    /** Replaces a top-level section, or inserts it before the first of the sections that follow it, else at the end. */
+    // Replaces a top-level section, or inserts it before the first of the sections that follow it, else at the end.
     static String replaceSection(final String text, final String name, final String section) {
         final List<String> lines = new ArrayList<>(text.lines().toList());
         final int start = topLevel(lines, name);

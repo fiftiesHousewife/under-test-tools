@@ -14,21 +14,18 @@ import net.sourceforge.pmd.PMDConfiguration;
 import net.sourceforge.pmd.PmdAnalysis;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.CpdAnalysis;
-import net.sourceforge.pmd.cpd.Mark;
 import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 import net.sourceforge.pmd.reporting.Report;
 import net.sourceforge.pmd.reporting.RuleViolation;
 
-/**
- * Runs PMD with the toolkit's anti-pattern rules, and PMD's copy-paste detector, over the test folders, in this
- * process: nothing else needs installing.
- */
+// Runs PMD with the toolkit's anti-pattern rules, and PMD's copy-paste detector, over the test folders, in this
+// process: nothing else needs installing.
 final class PmdRunner {
 
     /** A rule's hit: the rule, the file from the repo root, and the line. */
     record Hit(String rule, String file, int line) {
-        /** The kind a rule finds: its name up to {@code __}, with {@code _} as {@code -}. */
+        // The kind a rule finds: its name up to __, with _ as -.
         String kind() {
             final int end = rule.indexOf("__");
             return (end < 0 ? rule : rule.substring(0, end)).replace('_', '-');
@@ -63,7 +60,7 @@ final class PmdRunner {
         return hits;
     }
 
-    /** Groups of copied code, ignoring literals, of at least 75 tokens. */
+    // Groups of copied code, ignoring literals, of at least 75 tokens.
     static List<List<Copy>> copies(final Path repo, final List<String> folders) {
         final CPDConfiguration config = new CPDConfiguration();
         config.setOnlyRecognizeLanguage(LanguageRegistry.CPD.getLanguageById("java"));
@@ -72,21 +69,19 @@ final class PmdRunner {
         existing(repo, folders).forEach(config::addInputPath);
         final List<List<Copy>> groups = new ArrayList<>();
         try (CpdAnalysis cpd = CpdAnalysis.create(config)) {
-            cpd.performAnalysis(report -> {
-                for (final Match match : report.getMatches()) {
-                    final List<Copy> group = new ArrayList<>();
-                    for (final Mark mark : match.getMarkSet()) {
-                        group.add(new Copy(relative(repo, mark.getLocation().getFileId().getAbsolutePath()),
-                            mark.getLocation().getStartLine(), mark.getLocation().getEndLine()));
-                    }
-                    group.sort(Comparator.comparing(Copy::file).thenComparingInt(Copy::beginLine));
-                    groups.add(group);
-                }
-            });
+            cpd.performAnalysis(report -> report.getMatches().forEach(match -> groups.add(group(repo, match))));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return groups;
+    }
+
+    private static List<Copy> group(final Path repo, final Match match) {
+        return match.getMarkSet().stream()
+            .map(mark -> new Copy(relative(repo, mark.getLocation().getFileId().getAbsolutePath()),
+                mark.getLocation().getStartLine(), mark.getLocation().getEndLine()))
+            .sorted(Comparator.comparing(Copy::file).thenComparingInt(Copy::beginLine))
+            .toList();
     }
 
     private static List<Path> existing(final Path repo, final List<String> folders) {

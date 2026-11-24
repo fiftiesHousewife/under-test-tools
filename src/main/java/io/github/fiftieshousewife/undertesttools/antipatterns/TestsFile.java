@@ -1,8 +1,5 @@
 package io.github.fiftieshousewife.undertesttools.antipatterns;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,21 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.yaml.YAMLMapper;
 
-/**
- * Updates {@code testing/tests.yaml}, the repo's list of tests, changing only what find-test-anti-patterns owns: its
- * key under {@code found_by}, and in each entry the kinds this tool decides. Kinds the skill decides by reading
- * ({@code reaches-external-system} with its {@code reaches}, and the {@code other-...} kinds) and every other skill's
- * fields stay as they are.
- */
+// Updates testing/tests.yaml, the repo's list of tests, changing only what find-test-anti-patterns owns: its key under
+// found_by, and in each entry the kinds this tool decides. Kinds the skill decides by reading (reaches-external-system
+// with its reaches, and the other-... kinds) and every other skill's fields stay as they are.
 final class TestsFile {
 
     static final String OWNER = "find-test-anti-patterns";
     static final String DEFAULT_SCHEMA =
         "https://raw.githubusercontent.com/fiftiesHousewife/under-test/main/schema/tests.schema.json";
-    private static final ObjectMapper YAML = YAMLMapper.builder().build();
 
     private TestsFile() {
     }
@@ -35,9 +26,10 @@ final class TestsFile {
     }
 
     static void update(final Path file, final Update update) {
-        final String header = Files.exists(file) ? header(read(file))
+        final String header = Files.exists(file) ? header(YamlFile.read(file))
             : "# yaml-language-server: $schema=" + DEFAULT_SCHEMA;
-        final Map<String, Object> root = Files.exists(file) ? parse(read(file)) : new LinkedHashMap<>();
+        final Map<String, Object> root =
+            Files.exists(file) ? YamlFile.parse(YamlFile.read(file)) : new LinkedHashMap<>();
         final Map<String, Map<String, Object>> entries = new TreeMap<>();
         for (final Object item : list(root.get("tests"))) {
             @SuppressWarnings("unchecked")
@@ -49,7 +41,7 @@ final class TestsFile {
         }
         update.findings().forEach((test, finding) -> apply(entries, test, finding));
         entries.values().removeIf(e -> e.keySet().equals(Set.of("test", "at")));
-        write(file, header, rootWith(root, update, new ArrayList<>(entries.values())));
+        YamlFile.write(file, header, rootWith(root, update, new ArrayList<>(entries.values())));
     }
 
     private static Map<String, Object> rootWith(final Map<String, Object> old, final Update update,
@@ -83,7 +75,7 @@ final class TestsFile {
         entries.put(test, ordered);
     }
 
-    /** Removes the kinds this tool decides, keeping the skill's; an anti_patterns left with no kinds goes. */
+    // Removes the kinds this tool decides, keeping the skill's; an anti_patterns left with no kinds goes.
     private static void clearOwnedKinds(final Map<String, Object> entry) {
         if (!(entry.get("anti_patterns") instanceof Map<?, ?>)) {
             return;
@@ -148,33 +140,5 @@ final class TestsFile {
             header.append(header.length() == 0 ? "" : "\n").append(line);
         }
         return header.length() == 0 ? "# yaml-language-server: $schema=" + DEFAULT_SCHEMA : header.toString();
-    }
-
-    @SuppressWarnings("unchecked")
-    static Map<String, Object> parse(final String text) {
-        final Object root = YAML.readValue(text, Object.class);
-        return root instanceof Map<?, ?> m ? new LinkedHashMap<>((Map<String, Object>) m) : new LinkedHashMap<>();
-    }
-
-    static String read(final Path file) {
-        try {
-            return Files.readString(file, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Can't read " + file, e);
-        }
-    }
-
-    private static void write(final Path file, final String header, final Map<String, Object> root) {
-        final StringBuilder out = new StringBuilder(header).append('\n');
-        root.entrySet().forEach(e -> YamlText.write(out, 0, e));
-        try {
-            final Path parent = file.toAbsolutePath().getParent();
-            if (parent != null) {
-                Files.createDirectories(parent);
-            }
-            Files.writeString(file, out.toString(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Can't write " + file, e);
-        }
     }
 }

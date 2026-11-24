@@ -5,11 +5,9 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -45,47 +43,47 @@ public final class AntiPatternsCommand {
         }
         final Options options = Options.parse(args);
         final Path testing = options.getRepo().resolve(options.getTesting());
-        final Map<String, Object> foundBy = new LinkedHashMap<>();
-        foundBy.put("version", options.getVersion());
-        foundBy.put("commit", options.givenCommit().orElseGet(() -> commit(options.getRepo())));
+        final Map<String, Object> foundBy = foundBy(options);
         if (!options.isSummaryOnly()) {
-            final Finder.Result result = Finder.find(options.getRepo(), modulesOrRoot(options), options.rulesFile());
-            final Map<String, Object> testsFoundBy = new LinkedHashMap<>(foundBy);
-            if (!options.getModules().isEmpty()) {
-                testsFoundBy.put("modules", options.getModules());
-            }
-            TestsFile.update(testing.resolve("tests.yaml"),
-                new TestsFile.Update(result.findings(), testsFoundBy, options.getModules()));
-            log.info("{} tests; {} with an anti-pattern this tool decides.", result.tests(), result.findings().size());
+            findAndWrite(options, testing.resolve("tests.yaml"), foundBy);
         }
-        final List<AssessmentFile.Summary> summary =
-            AssessmentFile.summarise(TestsFile.parse(TestsFile.read(testing.resolve("tests.yaml"))));
-        final Path assessment = testing.resolve("assessment.yaml");
-        AssessmentFile.update(assessment, AssessmentFile.section(foundBy, options.getModules(), summary),
-            String.valueOf(options.getRepo().toAbsolutePath().normalize().getFileName()));
-        AssessmentFile.write(assessment, Decisions.update(TestsFile.read(assessment),
-            summary.stream().map(AssessmentFile.Summary::id).toList()));
-        summary.forEach(s -> log.info("{}: {} tests, e.g. {}", s.id(), s.tests(), s.examples()));
+        summarise(options, testing, foundBy);
         return 0;
     }
 
-    private static List<String> modulesOrRoot(final Options options) {
-        return options.getModules().isEmpty() ? List.of("") : options.getModules();
+    private static Map<String, Object> foundBy(final Options options) {
+        final Map<String, Object> foundBy = new LinkedHashMap<>();
+        foundBy.put("version", options.getVersion());
+        foundBy.put("commit", options.givenCommit().orElseGet(() -> commit(options.getRepo())));
+        return foundBy;
     }
 
-    /** What {@code git rev-parse --short HEAD} prints in the repo; there must be a git repository. */
+    private static void findAndWrite(final Options options, final Path testsFile, final Map<String, Object> foundBy) {
+        final List<String> modules = options.getModules().isEmpty() ? List.of("") : options.getModules();
+        final Finder.Result result = Finder.find(options.getRepo(), modules, options.rulesFile());
+        final Map<String, Object> testsFoundBy = new LinkedHashMap<>(foundBy);
+        if (!options.getModules().isEmpty()) {
+            testsFoundBy.put("modules", options.getModules());
+        }
+        TestsFile.update(testsFile, new TestsFile.Update(result.findings(), testsFoundBy, options.getModules()));
+        log.info("{} tests; {} with an anti-pattern this tool decides.", result.tests(), result.findings().size());
+    }
+
+    private static void summarise(final Options options, final Path testing, final Map<String, Object> foundBy) {
+        final List<AssessmentFile.Summary> summary =
+            AssessmentFile.summarise(YamlFile.parse(YamlFile.read(testing.resolve("tests.yaml"))));
+        final Path assessment = testing.resolve("assessment.yaml");
+        AssessmentFile.update(assessment, AssessmentFile.section(foundBy, options.getModules(), summary),
+            String.valueOf(options.getRepo().toAbsolutePath().normalize().getFileName()));
+        AssessmentFile.write(assessment, Decisions.update(YamlFile.read(assessment),
+            summary.stream().map(AssessmentFile.Summary::id).toList()));
+        summary.forEach(s -> log.info("{}: {} tests, e.g. {}", s.id(), s.tests(), s.examples()));
+    }
+
+    // What git rev-parse --short HEAD prints in the repo; there must be a git repository.
     static String commit(final Path repo) {
         try {
-            final Process git = new ProcessBuilder("git", "rev-parse", "--short", "HEAD")
-                .directory(repo.toFile()).redirectErrorStream(true).start();
-            final String out;
-            try (InputStream in = git.getInputStream()) {
-                out = new String(in.readAllBytes(), StandardCharsets.UTF_8).strip();
-            }
-            if (git.waitFor() != 0) {
-                throw new IllegalStateException("No git repository at " + repo + ": " + out);
-            }
-            return out;
+            return gitHead(repo);
         } catch (IOException e) {
             throw new UncheckedIOException("Can't run git", e);
         } catch (InterruptedException e) {
@@ -94,54 +92,16 @@ public final class AntiPatternsCommand {
         }
     }
 
-    /** The command line, read. */
-    @lombok.Value
-    @lombok.Builder
-    static class Options {
-        Path repo;
-        List<String> modules;
-        Path rules;
-        String version;
-        String commit;
-        String testing;
-        boolean summaryOnly;
-
-        Optional<Path> rulesFile() {
-            return Optional.ofNullable(rules);
+    private static String gitHead(final Path repo) throws IOException, InterruptedException {
+        final Process git = new ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+            .directory(repo.toFile()).redirectErrorStream(true).start();
+        final String out;
+        try (InputStream in = git.getInputStream()) {
+            out = new String(in.readAllBytes(), StandardCharsets.UTF_8).strip();
         }
-
-        Optional<String> givenCommit() {
-            return Optional.ofNullable(commit);
+        if (git.waitFor() != 0) {
+            throw new IllegalStateException("No git repository at " + repo + ": " + out);
         }
-
-        static Options parse(final List<String> args) {
-            final Map<String, String> values = new LinkedHashMap<>();
-            final List<String> modules = new ArrayList<>();
-            boolean summaryOnly = false;
-            for (int i = 0; i < args.size(); i++) {
-                final String flag = args.get(i);
-                if ("--summary-only".equals(flag)) {
-                    summaryOnly = true;
-                    continue;
-                }
-                if (i + 1 >= args.size() || !flag.startsWith("--")) {
-                    throw new IllegalArgumentException("Expected an option with a value at " + flag + "\n\n" + USAGE);
-                }
-                final String value = args.get(++i);
-                if ("--module".equals(flag)) {
-                    modules.add(value.replace('\\', '/').replaceAll("/+$", ""));
-                } else {
-                    values.put(flag, value);
-                }
-            }
-            final List<String> known = List.of("--repo", "--rules", "--version", "--commit", "--testing");
-            values.keySet().stream().filter(k -> !known.contains(k)).findFirst().ifPresent(k -> {
-                throw new IllegalArgumentException("Unknown option " + k + "\n\n" + USAGE);
-            });
-            return Options.builder().repo(Path.of(values.getOrDefault("--repo", "."))).modules(List.copyOf(modules))
-                .rules(values.containsKey("--rules") ? Path.of(values.get("--rules")) : null)
-                .version(values.getOrDefault("--version", "unreleased")).commit(values.get("--commit"))
-                .testing(values.getOrDefault("--testing", "testing")).summaryOnly(summaryOnly).build();
-        }
+        return out;
     }
 }

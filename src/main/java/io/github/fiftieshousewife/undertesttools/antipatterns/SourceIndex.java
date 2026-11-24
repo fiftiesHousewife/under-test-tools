@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,10 +28,6 @@ public final class SourceIndex {
 
     static final Set<String> TEST_ANNOTATIONS =
         Set.of("Test", "ParameterizedTest", "RepeatedTest", "TestFactory", "TestTemplate");
-    private static final Set<String> JUNIT3_BASES = Set.of("TestCase", "AbstractDependencyInjectionSpringContextTests",
-        "AbstractTransactionalSpringContextTests", "AbstractTransactionalDataSourceSpringContextTests",
-        "AbstractJpaTests", "AbstractSpringContextTests", "AbstractJUnit38SpringContextTests",
-        "AbstractTransactionalJUnit38SpringContextTests");
 
     private final List<ClassInfo> classes;
     private final int filesNotParsed;
@@ -60,7 +55,7 @@ public final class SourceIndex {
                     .forEach(c -> found.add(ClassReader.read(c, new ClassReader.Where(name, folder, unit.get()))));
             }
         }
-        return new SourceIndex(withJunit3Tests(found), failed);
+        return new SourceIndex(Junit3.withTests(found), failed);
     }
 
     public List<ClassInfo> getClasses() {
@@ -90,33 +85,7 @@ public final class SourceIndex {
     public boolean isJunit3(final ClassInfo type) {
         final Map<String, ClassInfo> bySimpleName = new HashMap<>();
         classes.forEach(c -> bySimpleName.putIfAbsent(c.getSimpleName(), c));
-        return extendsJunit3(type, bySimpleName);
-    }
-
-    private static boolean extendsJunit3(final ClassInfo type, final Map<String, ClassInfo> bySimpleName) {
-        final Set<String> seen = new HashSet<>();
-        String parent = type.getSuperclass();
-        while (!parent.isEmpty() && seen.add(parent)) {
-            if (JUNIT3_BASES.contains(parent)) {
-                return true;
-            }
-            final ClassInfo next = bySimpleName.get(parent);
-            parent = next == null ? "" : next.getSuperclass();
-        }
-        return false;
-    }
-
-    private static List<ClassInfo> withJunit3Tests(final List<ClassInfo> found) {
-        final Map<String, ClassInfo> bySimpleName = new HashMap<>();
-        found.forEach(c -> bySimpleName.putIfAbsent(c.getSimpleName(), c));
-        return found.stream().map(c -> extendsJunit3(c, bySimpleName) ? markJunit3(c) : c).toList();
-    }
-
-    private static ClassInfo markJunit3(final ClassInfo type) {
-        final List<MethodInfo> methods = type.getMethods().stream()
-            .map(m -> m.isTest() || !m.getName().startsWith("test") ? m : m.toBuilder().test(true).build())
-            .toList();
-        return type.toBuilder().clearMethods().methods(methods).build();
+        return Junit3.extendsBase(type, bySimpleName);
     }
 
     private static List<Path> javaFiles(final Path folder) {

@@ -59,7 +59,7 @@ public final class Finder {
         return entry(method.testName(), method.at());
     }
 
-    /** Tests in a folder the build doesn't run, or in a class Maven's test runner doesn't pick up, never run. */
+    // Tests in a folder the build doesn't run, or in a class Maven's test runner doesn't pick up, never run.
     private void notRun(final TestFolders layout) {
         for (final TestFolders.Folder folder : layout.getFolders()) {
             index.getClasses().stream().filter(c -> c.getFolder().equals(folder.path()))
@@ -69,23 +69,30 @@ public final class Finder {
     }
 
     private void hit(final PmdRunner.Hit hit) {
-        final Optional<MethodInfo> method = index.methodAt(hit.file(), hit.line());
-        if (method.isEmpty()) {
-            index.classAt(hit.file(), hit.line()).ifPresent(c -> c.tests().forEach(t -> entry(t).add(hit.kind())));
+        index.methodAt(hit.file(), hit.line()).ifPresentOrElse(m -> methodHit(hit, m), () -> classHit(hit));
+    }
+
+    private void classHit(final PmdRunner.Hit hit) {
+        index.classAt(hit.file(), hit.line()).ifPresent(c -> c.tests().forEach(t -> entry(t).add(hit.kind())));
+    }
+
+    // A sleep in a set-up method counts for every test of its class.
+    private void methodHit(final PmdRunner.Hit hit, final MethodInfo method) {
+        if (dropped(hit, method)) {
             return;
         }
-        final MethodInfo m = method.get();
-        if (dropped(hit, m)) {
-            return;
-        }
-        if (m.isTest() || Finding.NEVER_RUNS.equals(hit.kind())) {
-            entry(m).add(hit.kind());
-        } else if (m.isSetUp() && "sleeps".equals(hit.kind())) {
-            index.classAt(hit.file(), hit.line()).ifPresent(c -> c.tests().forEach(t -> entry(t).add(hit.kind())));
+        if (countsForTheMethod(hit, method)) {
+            entry(method).add(hit.kind());
+        } else if (method.isSetUp() && "sleeps".equals(hit.kind())) {
+            classHit(hit);
         }
     }
 
-    /** A detached-test hit in a JUnit 3 class is a real test; the expected-exception idiom swallows nothing. */
+    private static boolean countsForTheMethod(final PmdRunner.Hit hit, final MethodInfo method) {
+        return method.isTest() || Finding.NEVER_RUNS.equals(hit.kind());
+    }
+
+    // A detached-test hit in a JUnit 3 class is a real test; the expected-exception idiom swallows nothing.
     private boolean dropped(final PmdRunner.Hit hit, final MethodInfo method) {
         if (hit.rule().equals("never_runs__DetachedTest")) {
             return index.classAt(hit.file(), hit.line()).map(index::isJunit3).orElse(false);
@@ -93,7 +100,7 @@ public final class Finder {
         return "swallows-failures".equals(hit.kind()) && expectedExceptionIdiom(hit, method);
     }
 
-    /** A {@code try} whose last statement is {@code fail(...)}: the catch holds the exception the test expects. */
+    // A try whose last statement is fail(...): the catch holds the exception the test expects.
     private boolean expectedExceptionIdiom(final PmdRunner.Hit hit, final MethodInfo method) {
         final CompilationUnit unit = parse(repo.resolve(hit.file()));
         return unit.findAll(TryStmt.class).stream()

@@ -37,7 +37,7 @@ class SampleRepoTest {
 
     @Test
     void countsEveryKindAsTheEvalExpects() {
-        final Map<String, Integer> counts = AssessmentFile.summarise(TestsFile.parse(testsYaml)).stream()
+        final Map<String, Integer> counts = AssessmentFile.summarise(YamlFile.parse(testsYaml)).stream()
             .collect(Collectors.toMap(AssessmentFile.Summary::id, AssessmentFile.Summary::tests));
         assertThat(counts).containsExactlyInAnyOrderEntriesOf(Map.of("disabled", 5, "never-runs", 7,
             "no-real-assertion", 5, "swallows-failures", 2, "copy-pasted", 6, "mocks-everything", 2,

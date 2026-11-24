@@ -16,14 +16,11 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-/**
- * Finds copied tests: every test holding a stretch of code the copy-paste detector found in another test, and every
- * test in a test class with a copy, the same or nearly the same, under another test folder.
- */
+// Finds copied tests: every test holding a stretch of code the copy-paste detector found in another test, and every
+// test in a test class with a copy, the same or nearly the same, under another test folder.
 final class CopyFinder {
 
-    /** Share of distinct lines two classes must have in common to count as copies of each other. */
-    private static final double NEARLY_THE_SAME = 0.8;
+    private static final double SHARE_OF_LINES_IN_COMMON_FOR_A_COPY = 0.8;
 
     private final Path repo;
     private final SourceIndex index;
@@ -60,7 +57,7 @@ final class CopyFinder {
         }
     }
 
-    /** Test classes of the same name under different folders, with nearly the same lines. */
+    // Test classes of the same name under different folders, with nearly the same lines.
     private void copiedClasses() {
         final Map<String, List<ClassInfo>> byName = index.getClasses().stream()
             .filter(c -> !c.tests().isEmpty())
@@ -84,10 +81,8 @@ final class CopyFinder {
         }
     }
 
-    /**
-     * Two classes with the same name in different folders also have the same test names; the one outside the first
-     * folder in byte order gets its folder added, so both have an entry.
-     */
+    // Two classes with the same name in different folders also have the same test names; the one outside the first
+    // folder in byte order gets its folder added, so both have an entry.
     private static String folderSuffix(final ClassInfo type, final ClassInfo other) {
         return type.getFolder().compareTo(other.getFolder()) > 0 ? " (" + type.getFolder() + ")" : "";
     }
@@ -98,7 +93,7 @@ final class CopyFinder {
         final Set<String> shared = new HashSet<>(linesA);
         shared.retainAll(linesB);
         final int larger = Math.max(linesA.size(), linesB.size());
-        return larger > 0 && (double) shared.size() / larger >= NEARLY_THE_SAME;
+        return larger > 0 && (double) shared.size() / larger >= SHARE_OF_LINES_IN_COMMON_FOR_A_COPY;
     }
 
     private Set<String> lines(final ClassInfo type) {

@@ -66,20 +66,21 @@ class FilesTest {
                 "anti_patterns:\n  new: 2\n")).isEqualTo("schema: a\nanti_patterns:\n  new: 2\ntechniques:\n  y: 2\n"));
     }
 
+    private static final String DECISIONS = """
+        schema: assessment/1
+        decisions:
+          anti-patterns/sleeps:
+            state: decided
+            choice: kept
+          anti-patterns/disabled:
+            state: stale
+          anti-patterns/copy-pasted:
+            state: proposed
+        """;
+
     @Test
     void decisionsGoStaleComeBackAndAreAddedButOtherwiseStay() {
-        final String text = """
-            schema: assessment/1
-            decisions:
-              anti-patterns/sleeps:
-                state: decided
-                choice: kept
-              anti-patterns/disabled:
-                state: stale
-              anti-patterns/copy-pasted:
-                state: proposed
-            """;
-        final String updated = Decisions.update(text, List.of("disabled", "never-runs", "sleeps",
+        final String updated = Decisions.update(DECISIONS, List.of("disabled", "never-runs", "sleeps",
             "other-name-does-not-match-assertions"));
         assertAll(
             () -> assertThat(updated).contains("anti-patterns/sleeps:\n    state: decided"),

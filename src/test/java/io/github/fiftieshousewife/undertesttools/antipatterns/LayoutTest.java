@@ -51,16 +51,16 @@ class LayoutTest {
     @Test
     void wrongArgumentsAreExplained() {
         assertAll(
-            () -> assertThatThrownBy(() -> AntiPatternsCommand.Options.parse(List.of("--colour", "red")))
+            () -> assertThatThrownBy(() -> Options.parse(List.of("--colour", "red")))
                 .hasMessageContaining("Unknown option --colour"),
-            () -> assertThatThrownBy(() -> AntiPatternsCommand.Options.parse(List.of("--repo")))
+            () -> assertThatThrownBy(() -> Options.parse(List.of("--repo")))
                 .hasMessageContaining("Expected an option with a value"),
             () -> assertThat(AntiPatternsCommand.run(List.of("--help"))).isZero());
     }
 
     @Test
     void readsModulesAndTheSummaryOnlySwitch() {
-        final AntiPatternsCommand.Options options = AntiPatternsCommand.Options.parse(
+        final Options options = Options.parse(
             List.of("--module", "server/", "--summary-only", "--version", "1.2"));
         assertAll(
             () -> assertThat(options.getModules()).containsExactly("server"),
