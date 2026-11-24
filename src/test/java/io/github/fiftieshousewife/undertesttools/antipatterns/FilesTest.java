@@ -18,12 +18,12 @@ class FilesTest {
         # yaml-language-server: $schema=../schema/tests.schema.json
         schema: tests/1
         found_by:
-          draft-the-connection-list: {version: "1.0", commit: "aaaaaaa"}
+          draft-the-external-systems-list: {version: "1.0", commit: "aaaaaaa"}
           find-test-anti-patterns: {version: "0.9", commit: "bbbbbbb"}
         tests:
           - test: "com.example.ATest.reachesTheDatabase"
             at: "src/test/java/com/example/ATest.java:5"
-            connections:
+            external_systems:
               - {node: "orders-db", kind: database, found_by: code-path}
             anti_patterns:
               kinds: [reaches-external-system, sleeps]
@@ -45,7 +45,7 @@ class FilesTest {
         final String text = Files.readString(file);
         assertAll(
             () -> assertThat(text).startsWith("# yaml-language-server: $schema=../schema/tests.schema.json\n"),
-            () -> assertThat(text).contains("draft-the-connection-list: {version: \"1.0\", commit: \"aaaaaaa\"}"),
+            () -> assertThat(text).contains("draft-the-external-systems-list: {version: \"1.0\", commit: \"aaaaaaa\"}"),
             () -> assertThat(text).contains("find-test-anti-patterns: {version: \"1.0\"}"),
             () -> assertThat(text).contains("- {node: orders-db, kind: database, found_by: code-path}"),
             () -> assertThat(text).contains("kinds: [reaches-external-system]"),
