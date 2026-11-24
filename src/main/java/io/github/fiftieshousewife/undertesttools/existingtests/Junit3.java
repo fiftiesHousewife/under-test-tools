@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.util.HashMap;
 import java.util.HashSet;

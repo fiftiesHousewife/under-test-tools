@@ -1,15 +1,17 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// Proposes a decision for each finding under decisions:, keyed anti-patterns/<id>: a missing one is appended as
-// proposed, one whose finding has gone becomes stale, a stale one whose finding is back is proposed again, and every
-// other decision stays as people left it.
+// Proposes a decision for each finding under decisions:, keyed meaningless/<id> or unreliable/<id>: a missing one is
+// appended as proposed, one whose finding has gone becomes stale, a stale one whose finding is back is proposed again,
+// and every other decision stays as people left it.
 final class Decisions {
 
     private static final String FLAKY = "fixed in the fix-flaky-tests workstream";
@@ -17,12 +19,12 @@ final class Decisions {
         "disabled", "Application Owner decides: re-enable, or delete once the approval-test baseline exists",
         "never-runs",
         "Application Owner decides: make it a real test, or delete once the approval-test baseline exists",
-        "reaches-external-system", "tagged and left out of normal runs",
         "sleeps", FLAKY,
         "order-dependent", FLAKY);
 
     static final String QUESTION = "Should these tests check what their names say, or what their assertions check?";
-    private static final String PREFIX = "  anti-patterns/";
+    private static final List<String> PREFIXES =
+        Arrays.stream(TestList.values()).map(list -> list.field() + "/").toList();
 
     private Decisions() {
     }
@@ -31,13 +33,18 @@ final class Decisions {
         return CHOICES.getOrDefault(id, "fixed in the strengthen-tests workstream");
     }
 
-    // The file's text with the decisions brought up to date for these finding ids, in finding order.
-    static String update(final String text, final List<String> ids) {
+    // The decision's key for a finding on a list: meaningless/disabled.
+    static String key(final TestList list, final String id) {
+        return list.field() + "/" + id;
+    }
+
+    // The file's text with the decisions brought up to date for these finding keys, in finding order.
+    static String update(final String text, final List<String> keys) {
         final List<String> lines = new ArrayList<>(text.lines().toList());
         final Map<String, Object> existing = existing(text);
-        restate(lines, existing, Set.copyOf(ids));
-        final List<String> added = ids.stream().filter(id -> !existing.containsKey("anti-patterns/" + id))
-            .flatMap(id -> proposed(id).stream()).toList();
+        restate(lines, existing, Set.copyOf(keys));
+        final List<String> added = keys.stream().filter(key -> !existing.containsKey(key))
+            .flatMap(key -> proposed(key).stream()).toList();
         if (!added.isEmpty()) {
             append(lines, added);
         }
@@ -45,8 +52,8 @@ final class Decisions {
     }
 
     // Stale where the finding has gone; proposed again where a stale one's finding is back.
-    private static void restate(final List<String> lines, final Map<String, Object> existing, final Set<String> ids) {
-        existing.forEach((key, value) -> next(state(value), ids.contains(key.substring("anti-patterns/".length())))
+    private static void restate(final List<String> lines, final Map<String, Object> existing, final Set<String> keys) {
+        existing.forEach((key, value) -> next(state(value), keys.contains(key))
             .ifPresent(state -> setState(lines, key, state)));
     }
 
@@ -69,8 +76,9 @@ final class Decisions {
         lines.addAll(end, added);
     }
 
-    private static List<String> proposed(final String id) {
-        final List<String> lines = new ArrayList<>(List.of(PREFIX + id + ":", "    state: proposed",
+    private static List<String> proposed(final String key) {
+        final String id = key.substring(key.indexOf('/') + 1);
+        final List<String> lines = new ArrayList<>(List.of("  " + key + ":", "    state: proposed",
             "    drafted_by: ai"));
         lines.add("other-name-does-not-match-assertions".equals(id) ? "    question: " + YamlText.scalar(QUESTION)
             : "    choice: " + YamlText.scalar(choice(id)));
@@ -96,8 +104,8 @@ final class Decisions {
         if (!(decisions instanceof Map<?, ?> all)) {
             return Map.of();
         }
-        return all.entrySet().stream().filter(e -> String.valueOf(e.getKey()).startsWith("anti-patterns/"))
+        return all.entrySet().stream().filter(e -> PREFIXES.stream().anyMatch(String.valueOf(e.getKey())::startsWith))
             .collect(Collectors.toMap(e -> String.valueOf(e.getKey()), e -> (Object) e.getValue(),
-                (a, b) -> a, java.util.LinkedHashMap::new));
+                (a, b) -> a, LinkedHashMap::new));
     }
 }

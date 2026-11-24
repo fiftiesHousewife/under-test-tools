@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,7 +55,7 @@ class LayoutTest {
                 .hasMessageContaining("Unknown option --colour"),
             () -> assertThatThrownBy(() -> Options.parse(List.of("--repo")))
                 .hasMessageContaining("Expected an option with a value"),
-            () -> assertThat(AntiPatternsCommand.run(List.of("--help"))).isZero());
+            () -> assertThat(MeaninglessAndUnreliableCommand.run(List.of("--help"))).isZero());
     }
 
     @Test
@@ -70,6 +70,7 @@ class LayoutTest {
 
     @Test
     void aRepoWithoutGitIsRefused(@TempDir final Path dir) {
-        assertThatThrownBy(() -> AntiPatternsCommand.commit(dir)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> MeaninglessAndUnreliableCommand.commit(dir))
+            .isInstanceOf(IllegalStateException.class);
     }
 }

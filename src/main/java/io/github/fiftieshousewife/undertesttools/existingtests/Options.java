@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 import lombok.Builder;
 import lombok.Value;
 
-// The anti-patterns sub-command's options, read from its command line.
+// The meaningless-and-unreliable sub-command's options, read from its command line.
 @Value
 @Builder
 class Options {
@@ -43,7 +43,7 @@ class Options {
         final Map<String, String> values = pairs.stream().filter(p -> !MODULE.equals(p.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, LinkedHashMap::new));
         values.keySet().stream().filter(k -> !KNOWN.contains(k)).findFirst().ifPresent(k -> {
-            throw new IllegalArgumentException("Unknown option " + k + "\n\n" + AntiPatternsCommand.USAGE);
+            throw new IllegalArgumentException("Unknown option " + k + "\n\n" + MeaninglessAndUnreliableCommand.USAGE);
         });
         return from(values, modules, summaryOnly);
     }
@@ -56,7 +56,7 @@ class Options {
         final String flag = args.get(at);
         if (at + 1 >= args.size() || !flag.startsWith("--")) {
             throw new IllegalArgumentException("Expected an option with a value at " + flag + "\n\n"
-                + AntiPatternsCommand.USAGE);
+                + MeaninglessAndUnreliableCommand.USAGE);
         }
         return Map.entry(flag, args.get(at + 1));
     }

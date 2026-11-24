@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;

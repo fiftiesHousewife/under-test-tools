@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.util.List;
 import java.util.Map;
@@ -8,12 +8,13 @@ import java.util.stream.Collectors;
 
 // Writes YAML the way under-test's skills write it: maps of scalars on one line ({version: "1", commit: "a"}), lists of
 // scalars on one line, every string double-quoted except a plain lower-case word such as a kind's name. The maps in
-// BLOCKS are written as blocks even when they would fit on a line, as the skills write them.
+// BLOCKS, and the maps listed under them, are written as blocks even when they would fit on a line, as the skills
+// write them.
 final class YamlText {
 
     private static final Pattern PLAIN = Pattern.compile("[a-z][a-z-]*");
     private static final String INDENT = "  ";
-    private static final Set<String> BLOCKS = Set.of("found_by", "anti_patterns", "tests");
+    private static final Set<String> BLOCKS = Set.of("found_by", "tests");
     private static final Set<String> RESERVED = Set.of("null", "true", "false");
 
     private YamlText() {
@@ -73,8 +74,7 @@ final class YamlText {
         if (isBlockMap(entry.getKey().toString(), value)) {
             writeMap(out, depth, entry);
         } else if (value instanceof List<?> list && !list.isEmpty() && !flatList(list)) {
-            out.append(INDENT.repeat(depth)).append(entry.getKey()).append(":\n");
-            list.forEach(item -> item(out, depth + 1, item));
+            items(out, depth, entry);
         } else {
             out.append(INDENT.repeat(depth)).append(entry.getKey()).append(": ").append(inline(value)).append('\n');
         }
@@ -98,13 +98,21 @@ final class YamlText {
         });
     }
 
-    private static void item(final StringBuilder out, final int depth, final Object item) {
-        if (item instanceof Map<?, ?> map && !flat(map)) {
-            final StringBuilder lines = new StringBuilder();
-            map.entrySet().forEach(e -> write(lines, depth + 1, e));
-            out.append(INDENT.repeat(depth)).append("- ").append(lines.substring(INDENT.length() * (depth + 1)));
-        } else {
-            out.append(INDENT.repeat(depth)).append("- ").append(inline(item)).append('\n');
+    private static void items(final StringBuilder out, final int depth, final Map.Entry<?, ?> entry) {
+        out.append(INDENT.repeat(depth)).append(entry.getKey()).append(":\n");
+        final boolean blocks = BLOCKS.contains(entry.getKey().toString());
+        for (final Object item : (List<?>) entry.getValue()) {
+            if (item instanceof Map<?, ?> map && (blocks || !flat(map))) {
+                blockItem(out, depth + 1, map);
+            } else {
+                out.append(INDENT.repeat(depth + 1)).append("- ").append(inline(item)).append('\n');
+            }
         }
+    }
+
+    private static void blockItem(final StringBuilder out, final int depth, final Map<?, ?> map) {
+        final StringBuilder lines = new StringBuilder();
+        map.entrySet().forEach(e -> write(lines, depth + 1, e));
+        out.append(INDENT.repeat(depth)).append("- ").append(lines.substring(INDENT.length() * (depth + 1)));
     }
 }

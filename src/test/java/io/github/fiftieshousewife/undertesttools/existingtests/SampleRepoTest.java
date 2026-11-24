@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * The example repo of find-test-anti-patterns' eval, with its known answers for every kind this tool decides. The
- * skill adds reaches-external-system itself.
+ * The example repo of find-meaningless-and-unreliable-tests' eval, with its known answers for every kind this tool
+ * decides. The skill adds the other-... kinds itself.
  */
 class SampleRepoTest {
 
@@ -30,18 +30,21 @@ class SampleRepoTest {
     static void runTheToolOnACopy() throws IOException {
         repo = workspace.resolve("sample-repo");
         copy(Path.of("src/test/resources/sample-repo"), repo);
-        AntiPatternsCommand.run(List.of("--repo", repo.toString(), "--commit", "1a2b3c4"));
+        MeaninglessAndUnreliableCommand.run(List.of("--repo", repo.toString(), "--commit", "1a2b3c4"));
         testsYaml = Files.readString(repo.resolve("testing/tests.yaml"));
         assessment = Files.readString(repo.resolve("testing/assessment.yaml"));
     }
 
     @Test
     void countsEveryKindAsTheEvalExpects() {
-        final Map<String, Integer> counts = AssessmentFile.summarise(YamlFile.parse(testsYaml)).stream()
-            .collect(Collectors.toMap(AssessmentFile.Summary::id, AssessmentFile.Summary::tests));
-        assertThat(counts).containsExactlyInAnyOrderEntriesOf(Map.of("disabled", 5, "never-runs", 7,
-            "no-real-assertion", 5, "swallows-failures", 2, "copy-pasted", 6, "mocks-everything", 2,
-            "order-dependent", 3, "sleeps", 2));
+        final Map<String, Object> tests = YamlFile.parse(testsYaml);
+        final Map<String, Integer> counts = Stream.of(TestList.values())
+            .flatMap(list -> AssessmentFile.summarise(tests, list).stream()
+                .map(s -> Map.entry(Decisions.key(list, s.id()), s.tests())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        assertThat(counts).containsExactlyInAnyOrderEntriesOf(Map.of("meaningless/disabled", 5,
+            "meaningless/never-runs", 7, "meaningless/no-real-assertion", 5, "meaningless/swallows-failures", 2,
+            "meaningless/mocks-everything", 2, "unreliable/order-dependent", 3, "unreliable/sleeps", 2));
     }
 
     @Test
@@ -49,8 +52,16 @@ class SampleRepoTest {
         assertThat(testsYaml).contains("""
               - test: "com.example.orders.StockLevelTest.reservesStock"
                 at: "src/test/java/com/example/orders/StockLevelTest.java:9"
-                anti_patterns:
-                  kinds: [no-real-assertion]
+                meaningless: [no-real-assertion]
+            """);
+    }
+
+    @Test
+    void putsEachKindOnItsList() {
+        assertThat(testsYaml).contains("""
+              - test: "com.example.orders.ReminderJobTest.sendsAReminderAfterADay"
+                at: "src/test/java/com/example/orders/ReminderJobTest.java:11"
+                unreliable: [sleeps]
             """);
     }
 
@@ -59,7 +70,9 @@ class SampleRepoTest {
         assertAll(
             () -> assertThat(testsYaml).doesNotContain("DiscountRulesContextTest"),
             () -> assertThat(testsYaml).doesNotContain("OrderLookupTest"),
-            () -> assertThat(testsYaml).doesNotContain("OrderChecks"));
+            () -> assertThat(testsYaml).doesNotContain("OrderChecks"),
+            () -> assertThat(testsYaml).doesNotContain("TaxTableTest"),
+            () -> assertThat(testsYaml).doesNotContain("anti_patterns"));
     }
 
     @Test
@@ -72,8 +85,7 @@ class SampleRepoTest {
         assertThat(testsYaml).contains("""
               - test: "com.example.orders.CheckoutJourneyTest.checksOutABasketOfTwoItems"
                 at: "src/functionalTest/java/com/example/orders/CheckoutJourneyTest.java:9"
-                anti_patterns:
-                  kinds: [never-runs]
+                meaningless: [never-runs]
             """);
     }
 
@@ -86,22 +98,39 @@ class SampleRepoTest {
     }
 
     @Test
-    void writesTheSummaryAndProposesADecisionForEachFinding() {
+    void writesBothSectionsMeaninglessFirst() {
         assertAll(
-            () -> assertThat(assessment).contains(
-                "  found_by: {tool: find-test-anti-patterns, version: unreleased, commit: \"1a2b3c4\"}"),
+            () -> assertThat(assessment).contains("""
+                unreliable_tests:
+                  found_by: {tool: find-meaningless-and-unreliable-tests, version: unreleased, commit: "1a2b3c4"}
+                  findings:
+                    - id: order-dependent
+                """),
             () -> assertThat(assessment).contains("""
                     - id: sleeps
                       kind: sleeps
                       tests: 2
                       examples: ["src/test/java/com/example/orders/ReminderJobTest.java:11", \
                 "src/test/java/com/example/orders/ReminderJobTest.java:18"]
+                decisions:
                 """),
+            () -> assertThat(assessment.indexOf("meaningless_tests:")).isBetween(0, assessment.indexOf("unreliable")));
+    }
+
+    @Test
+    void proposesADecisionForEachFinding() {
+        assertAll(
             () -> assertThat(assessment).contains("""
-                  anti-patterns/disabled:
+                  meaningless/disabled:
                     state: proposed
                     drafted_by: ai
                     choice: "Application Owner decides: re-enable, or delete once the approval-test baseline exists"
+                """),
+            () -> assertThat(assessment).endsWith("""
+                  unreliable/sleeps:
+                    state: proposed
+                    drafted_by: ai
+                    choice: "fixed in the fix-flaky-tests workstream"
                 """));
     }
 

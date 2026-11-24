@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,15 +12,12 @@ import java.util.List;
 import java.util.Optional;
 import net.sourceforge.pmd.PMDConfiguration;
 import net.sourceforge.pmd.PmdAnalysis;
-import net.sourceforge.pmd.cpd.CPDConfiguration;
-import net.sourceforge.pmd.cpd.CpdAnalysis;
-import net.sourceforge.pmd.cpd.Match;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 import net.sourceforge.pmd.reporting.Report;
 import net.sourceforge.pmd.reporting.RuleViolation;
 
-// Runs PMD with the toolkit's anti-pattern rules, and PMD's copy-paste detector, over the test folders, in this
-// process: nothing else needs installing.
+// Runs PMD with the toolkit's rules for meaningless and unreliable tests over the test folders, in this process:
+// nothing else needs installing.
 final class PmdRunner {
 
     /** A rule's hit: the rule, the file from the repo root, and the line. */
@@ -32,12 +29,7 @@ final class PmdRunner {
         }
     }
 
-    /** One stretch of copied code: the file from the repo root and its lines. */
-    record Copy(String file, int beginLine, int endLine) {
-    }
-
-    static final String BUILT_IN_RULES = "/anti-patterns.pmd.xml";
-    private static final int MINIMUM_TOKENS = 75;
+    static final String BUILT_IN_RULES = "/rules.pmd.xml";
 
     private PmdRunner() {
     }
@@ -60,30 +52,6 @@ final class PmdRunner {
         return hits;
     }
 
-    // Groups of copied code, ignoring literals, of at least 75 tokens.
-    static List<List<Copy>> copies(final Path repo, final List<String> folders) {
-        final CPDConfiguration config = new CPDConfiguration();
-        config.setOnlyRecognizeLanguage(LanguageRegistry.CPD.getLanguageById("java"));
-        config.setMinimumTileSize(MINIMUM_TOKENS);
-        config.setIgnoreLiterals(true);
-        existing(repo, folders).forEach(config::addInputPath);
-        final List<List<Copy>> groups = new ArrayList<>();
-        try (CpdAnalysis cpd = CpdAnalysis.create(config)) {
-            cpd.performAnalysis(report -> report.getMatches().forEach(match -> groups.add(group(repo, match))));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return groups;
-    }
-
-    private static List<Copy> group(final Path repo, final Match match) {
-        return match.getMarkSet().stream()
-            .map(mark -> new Copy(relative(repo, mark.getLocation().getFileId().getAbsolutePath()),
-                mark.getLocation().getStartLine(), mark.getLocation().getEndLine()))
-            .sorted(Comparator.comparing(Copy::file).thenComparingInt(Copy::beginLine))
-            .toList();
-    }
-
     private static List<Path> existing(final Path repo, final List<String> folders) {
         return folders.stream().map(repo::resolve).filter(Files::isDirectory).toList();
     }
@@ -98,7 +66,7 @@ final class PmdRunner {
             if (in == null) {
                 throw new IllegalStateException("The built-in rules are missing from the jar");
             }
-            final Path copy = Files.createTempFile("anti-patterns", ".pmd.xml");
+            final Path copy = Files.createTempFile("rules", ".pmd.xml");
             copy.toFile().deleteOnExit();
             Files.copy(in, copy, StandardCopyOption.REPLACE_EXISTING);
             return copy;

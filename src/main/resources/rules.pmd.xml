@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<!-- The toolkit's PMD rules for anti-patterns in existing Java tests, run by the find-test-anti-patterns skill:
-     pmd check -d <test folders> -R <this file> -f csv. Each rule's name starts with the anti-pattern kind it finds.
+<!-- The toolkit's PMD rules for meaningless and unreliable tests in existing Java tests, run by the
+     find-meaningless-and-unreliable-tests skill: pmd check -d <test folders> -R <this file> -f csv. Each rule's name
+     starts with the kind it finds.
      Reads code only; runs nothing. -->
-<ruleset name="Test anti-patterns" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+<ruleset name="Meaningless and unreliable tests" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-  <description>Anti-patterns in existing tests, for the find-test-anti-patterns skill.</description>
+  <description>Meaningless and unreliable tests, for the find-meaningless-and-unreliable-tests skill.</description>
 
   <!-- PMD's own rules -->
   <rule name="no_real_assertion__NoAssertion" language="java" class="net.sourceforge.pmd.lang.rule.xpath.XPathRule"

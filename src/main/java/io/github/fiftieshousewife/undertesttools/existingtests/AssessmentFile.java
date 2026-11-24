@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-// Writes the anti_patterns section of testing/assessment.yaml from testing/tests.yaml, and proposes a decision for each
-// finding. The file is edited as text: other sections, and the first line, stay as they are.
+// Writes the meaningless_tests and unreliable_tests sections of testing/assessment.yaml from testing/tests.yaml. The
+// file is edited as text: other sections, and the first line, stay as they are.
 final class AssessmentFile {
 
     static final String DEFAULT_SCHEMA =
@@ -30,10 +30,14 @@ final class AssessmentFile {
         }
     }
 
-    // Works the findings out from the entries of testing/tests.yaml.
-    static List<Summary> summarise(final Map<String, Object> testsYaml) {
+    /** What heads both sections: the run's version and commit, and the modules covered. */
+    record Header(Map<String, Object> foundBy, List<String> modules) {
+    }
+
+    // Works one list's findings out from the entries of testing/tests.yaml.
+    static List<Summary> summarise(final Map<String, Object> testsYaml, final TestList list) {
         final Map<String, List<String>> atsByKind = new TreeMap<>();
-        entries(testsYaml).forEach(entry -> kinds(entry).forEach(kind ->
+        entries(testsYaml).forEach(entry -> list.ordered(kinds(entry.get(list.field()))).forEach(kind ->
             atsByKind.computeIfAbsent(kind, x -> new ArrayList<>()).add(String.valueOf(entry.get("at")))));
         return atsByKind.entrySet().stream().map(e -> new Summary(e.getKey(), e.getValue().size(),
             e.getValue().stream().sorted(BY_PATH_THEN_LINE).limit(3).toList())).toList();
@@ -44,31 +48,33 @@ final class AssessmentFile {
             ? list.stream().filter(Map.class::isInstance).<Map<?, ?>>map(Map.class::cast).toList() : List.of();
     }
 
-    private static List<String> kinds(final Map<?, ?> entry) {
-        return entry.get("anti_patterns") instanceof Map<?, ?> found && found.get("kinds") instanceof List<?> kinds
-            ? kinds.stream().map(String::valueOf).toList() : List.of();
+    private static List<String> kinds(final Object value) {
+        return value instanceof List<?> kinds ? kinds.stream().map(String::valueOf).toList() : List.of();
     }
 
     static final Comparator<String> BY_PATH_THEN_LINE = Comparator
         .comparing((String at) -> at.substring(0, at.lastIndexOf(':')))
         .thenComparingInt(at -> Integer.parseInt(at.substring(at.lastIndexOf(':') + 1)));
 
-    static void update(final Path file, final String section, final String repoName) {
+    // Replaces both sections, given in list order, creating the file if there is none.
+    static void update(final Path file, final List<String> sections, final String repoName) {
         String text = Files.exists(file) ? YamlFile.read(file)
             : "# yaml-language-server: $schema=" + DEFAULT_SCHEMA + "\nschema: assessment/1\nrepo: {name: "
                 + YamlText.scalar(repoName) + "}\n";
-        text = replaceSection(text, "anti_patterns", section);
+        for (final String section : sections) {
+            text = replaceSection(text, section.substring(0, section.indexOf(':')), section);
+        }
         write(file, text);
     }
 
-    static String section(final Map<String, Object> foundBy, final List<String> modules, final List<Summary> found) {
-        final Map<String, Object> header = new LinkedHashMap<>();
-        header.put("tool", TestsFile.OWNER);
-        header.putAll(foundBy);
-        final StringBuilder out = new StringBuilder("anti_patterns:\n  found_by: ").append(YamlText.inline(header))
-            .append('\n');
-        if (!modules.isEmpty()) {
-            out.append("  modules: ").append(YamlText.inline(modules)).append('\n');
+    static String section(final TestList list, final Header header, final List<Summary> found) {
+        final Map<String, Object> foundBy = new LinkedHashMap<>();
+        foundBy.put("tool", TestsFile.OWNER);
+        foundBy.putAll(header.foundBy());
+        final StringBuilder out = new StringBuilder(list.section()).append(":\n  found_by: ")
+            .append(YamlText.inline(foundBy)).append('\n');
+        if (!header.modules().isEmpty()) {
+            out.append("  modules: ").append(YamlText.inline(header.modules())).append('\n');
         }
         out.append("  findings:").append(found.isEmpty() ? " []\n" : "\n");
         for (final Summary s : found) {
@@ -80,23 +86,35 @@ final class AssessmentFile {
         return out.toString();
     }
 
-    // Replaces a top-level section, or inserts it before the first of the sections that follow it, else at the end.
+    // Replaces a top-level section in place, or inserts it: unreliable_tests just after meaningless_tests, any other
+    // before the first of the sections that follow it, else at the end.
     static String replaceSection(final String text, final String name, final String section) {
         final List<String> lines = new ArrayList<>(text.lines().toList());
         final int start = topLevel(lines, name);
         if (start >= 0) {
-            int end = start + 1;
-            while (end < lines.size() && !isTopLevelKey(lines.get(end))) {
-                end++;
-            }
-            lines.subList(start, end).clear();
+            lines.subList(start, sectionEnd(lines, start)).clear();
             lines.addAll(start, section.lines().toList());
-            return String.join("\n", lines) + "\n";
+        } else {
+            lines.addAll(insertionPoint(lines, name), section.lines().toList());
         }
-        final int before = FOLLOWING_SECTIONS.stream().mapToInt(s -> topLevel(lines, s)).filter(i -> i >= 0)
-            .min().orElse(lines.size());
-        lines.addAll(before, section.lines().toList());
         return String.join("\n", lines) + "\n";
+    }
+
+    private static int insertionPoint(final List<String> lines, final String name) {
+        final int meaningless = topLevel(lines, TestList.MEANINGLESS.section());
+        if (TestList.UNRELIABLE.section().equals(name) && meaningless >= 0) {
+            return sectionEnd(lines, meaningless);
+        }
+        return FOLLOWING_SECTIONS.stream().mapToInt(s -> topLevel(lines, s)).filter(i -> i >= 0)
+            .min().orElse(lines.size());
+    }
+
+    private static int sectionEnd(final List<String> lines, final int start) {
+        int end = start + 1;
+        while (end < lines.size() && !isTopLevelKey(lines.get(end))) {
+            end++;
+        }
+        return end;
     }
 
     static int topLevel(final List<String> lines, final String name) {

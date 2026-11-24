@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -15,8 +15,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 /**
- * Finds the anti-patterns a program can decide, in the tests of the chosen modules, and gives each to its test:
- * everything find-test-anti-patterns counts except {@code reaches-external-system} and the {@code other} kinds, which
+ * Finds the meaningless and unreliable tests a program can decide, in the tests of the chosen modules, and gives each
+ * kind to its test: everything find-meaningless-and-unreliable-tests counts except the {@code other-...} kinds, which
  * need its judgement.
  */
 public final class Finder {
@@ -43,7 +43,6 @@ public final class Finder {
         final Finder finder = new Finder(repo, SourceIndex.read(repo, folders));
         layouts.forEach(finder::notRun);
         PmdRunner.hits(repo, folders, rules).forEach(finder::hit);
-        new CopyFinder(repo, finder.index, finder::entry).find(PmdRunner.copies(repo, folders));
         final List<Features.Scenario> scenarios = Features.read(repo, resourceFolders(layouts));
         scenarios.stream().filter(Features.Scenario::disabled)
             .forEach(s -> finder.entry(s.test(), s.at()).add(Finding.DISABLED));
@@ -51,7 +50,7 @@ public final class Finder {
         return new Result(finder.findings, tests, finder.index.getFilesNotParsed());
     }
 
-    Finding entry(final String test, final String at) {
+    private Finding entry(final String test, final String at) {
         return findings.computeIfAbsent(test, t -> new Finding(at));
     }
 

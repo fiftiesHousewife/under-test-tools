@@ -1,4 +1,4 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;

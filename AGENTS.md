@@ -11,9 +11,9 @@ text, things referred to by name.
 | Path | What |
 |---|---|
 | `src/main/java/.../undertesttools/Main.java` | Chooses the sub-command |
-| `src/main/java/.../undertesttools/antipatterns/` | `anti-patterns`: `SourceIndex` and `TestFolders` list the tests, `PmdRunner` runs PMD and its copy-paste detector, `Finder` and `CopyFinder` give hits to tests, `TestsFile`, `AssessmentFile` and `Decisions` write the files |
-| `src/main/resources/anti-patterns.pmd.xml` | A copy of under-test's rules, used when `--rules` isn't given; under-test's is the source |
-| `src/test/resources/sample-repo/` | A copy of the example repo of under-test's find-test-anti-patterns eval, whose known answers the tests check |
+| `src/main/java/.../undertesttools/existingtests/` | `meaningless-and-unreliable`, which finds a repo's meaningless tests (they never run, can't fail, or check only their mocks) and unreliable tests (they sleep, or depend on the order tests run in): `SourceIndex` and `TestFolders` list the tests, `PmdRunner` runs PMD, `Finder` gives hits to tests, `TestList` holds the two lists' kinds, `TestsFile`, `AssessmentFile` and `Decisions` write the files |
+| `src/main/resources/rules.pmd.xml` | A copy of under-test's rules for meaningless and unreliable tests, used when `--rules` isn't given; under-test's is the source |
+| `src/test/resources/sample-repo/` | A copy of the example repo of under-test's find-meaningless-and-unreliable-tests eval, whose known answers the tests check |
 | `build-logic/`, `config/quality/` | The same Gradle conventions and quality rules as under-test |
 
 ## Rules for a sub-command

@@ -10,13 +10,15 @@ import org.junit.jupiter.api.io.TempDir;
 
 class MainTest {
 
+    private static final String STEP = "meaningless-and-unreliable";
+
     @Test
     void choosesTheStepAndExplainsMistakes(@TempDir final Path dir) {
         assertAll(
             () -> assertThat(Main.run(List.of())).isEqualTo(Main.WRONG_ARGUMENTS),
             () -> assertThat(Main.run(List.of("--help"))).isEqualTo(Main.OK),
             () -> assertThat(Main.run(List.of("tidy-up"))).isEqualTo(Main.WRONG_ARGUMENTS),
-            () -> assertThat(Main.run(List.of("anti-patterns", "--colour", "red"))).isEqualTo(Main.WRONG_ARGUMENTS),
-            () -> assertThat(Main.run(List.of("anti-patterns", "--repo", dir.toString()))).isEqualTo(Main.FAILED));
+            () -> assertThat(Main.run(List.of(STEP, "--colour", "red"))).isEqualTo(Main.WRONG_ARGUMENTS),
+            () -> assertThat(Main.run(List.of(STEP, "--repo", dir.toString()))).isEqualTo(Main.FAILED));
     }
 }

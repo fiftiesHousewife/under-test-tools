@@ -1,20 +1,21 @@
-package io.github.fiftieshousewife.undertesttools.antipatterns;
+package io.github.fiftieshousewife.undertesttools.existingtests;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-// Updates testing/tests.yaml, the repo's list of tests, changing only what find-test-anti-patterns owns: its key under
-// found_by, and in each entry the kinds this tool decides. Kinds the skill decides by reading (reaches-external-system
-// with its reaches, and the other-... kinds) and every other skill's fields stay as they are.
+// Updates testing/tests.yaml, the repo's list of tests, changing only what find-meaningless-and-unreliable-tests owns:
+// its key under found_by, and each entry's meaningless and unreliable. The other-... kinds the skill decides by
+// reading, and every other skill's fields, stay as they are.
 final class TestsFile {
 
-    static final String OWNER = "find-test-anti-patterns";
+    static final String OWNER = "find-meaningless-and-unreliable-tests";
     static final String DEFAULT_SCHEMA =
         "https://raw.githubusercontent.com/fiftiesHousewife/under-test/main/schema/tests.schema.json";
 
@@ -57,70 +58,43 @@ final class TestsFile {
         return root;
     }
 
+    // The test's entry, at its line now, with the kinds found added to each list's: meaningless, then unreliable.
     private static void apply(final Map<String, Map<String, Object>> entries, final String test, final Finding found) {
         final Map<String, Object> entry = entries.computeIfAbsent(test, t -> new LinkedHashMap<>(Map.of("test", t)));
         final Map<String, Object> ordered = new LinkedHashMap<>();
         ordered.put("test", test);
         ordered.put("at", found.getAt());
         entry.forEach(ordered::putIfAbsent);
-        final Map<String, Object> antiPatterns = antiPatterns(ordered);
-        final List<String> kinds = new ArrayList<>(strings(antiPatterns.get("kinds")));
-        found.getKinds().stream().filter(k -> !kinds.contains(k)).forEach(kinds::add);
-        kinds.sort(String::compareTo);
-        antiPatterns.put("kinds", kinds);
-        if (found.getCopyOf() != null) {
-            antiPatterns.put("copy_of", found.getCopyOf());
+        for (final TestList list : TestList.values()) {
+            final Set<String> kinds = new LinkedHashSet<>(strings(ordered.get(list.field())));
+            kinds.addAll(found.on(list));
+            put(ordered, list.field(), list.ordered(kinds));
         }
-        ordered.put("anti_patterns", order(antiPatterns));
         entries.put(test, ordered);
     }
 
-    // Removes the kinds this tool decides, keeping the skill's; an anti_patterns left with no kinds goes.
+    // Removes the kinds this tool decides, keeping the skill's other-... kinds; a list left empty goes.
     private static void clearOwnedKinds(final Map<String, Object> entry) {
-        if (!(entry.get("anti_patterns") instanceof Map<?, ?>)) {
-            return;
-        }
-        final Map<String, Object> antiPatterns = antiPatterns(entry);
-        final List<String> kept = strings(antiPatterns.get("kinds")).stream().filter(TestsFile::skillsOwn).toList();
-        antiPatterns.remove("copy_of");
-        if (!kept.contains("reaches-external-system")) {
-            antiPatterns.remove("reaches");
-        }
-        if (kept.isEmpty()) {
-            entry.remove("anti_patterns");
+        entry.remove(TestList.UNRELIABLE.field());
+        final String meaningless = TestList.MEANINGLESS.field();
+        put(entry, meaningless, strings(entry.get(meaningless)).stream().filter(TestsFile::skillsOwn).toList());
+    }
+
+    private static void put(final Map<String, Object> entry, final String field, final List<String> kinds) {
+        if (kinds.isEmpty()) {
+            entry.remove(field);
         } else {
-            antiPatterns.put("kinds", kept);
-            entry.put("anti_patterns", order(antiPatterns));
+            entry.put(field, kinds);
         }
     }
 
     static boolean skillsOwn(final String kind) {
-        return "reaches-external-system".equals(kind) || kind.startsWith("other-");
+        return kind.startsWith("other-");
     }
 
     private static boolean covered(final Map<String, Object> entry, final List<String> modules) {
         final String at = String.valueOf(entry.get("at"));
         return modules.isEmpty() || modules.stream().anyMatch(m -> at.startsWith(m + "/"));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> antiPatterns(final Map<String, Object> entry) {
-        final Object existing = entry.get("anti_patterns");
-        final Map<String, Object> copy = existing instanceof Map<?, ?> m
-            ? new LinkedHashMap<>((Map<String, Object>) m) : new LinkedHashMap<>();
-        entry.put("anti_patterns", copy);
-        return copy;
-    }
-
-    private static Map<String, Object> order(final Map<String, Object> antiPatterns) {
-        final Map<String, Object> ordered = new LinkedHashMap<>();
-        for (final String key : List.of("kinds", "reaches", "copy_of")) {
-            if (antiPatterns.containsKey(key)) {
-                ordered.put(key, antiPatterns.get(key));
-            }
-        }
-        antiPatterns.forEach(ordered::putIfAbsent);
-        return ordered;
     }
 
     private static List<String> strings(final Object value) {

@@ -11,29 +11,36 @@ slower than a program and comes out differently from run to run, so the step mov
 
 It reads a repo's files and writes only under its `testing/` folder. It runs none of the repo's code.
 
-## anti-patterns
+## meaningless-and-unreliable
 
-The find-test-anti-patterns skill's mechanical steps. For each chosen module it:
+The find-meaningless-and-unreliable-tests skill's mechanical steps. It keeps two lists of a repo's existing tests:
+
+* **meaningless tests** pass whatever the code does: they never run (`never-runs`, `disabled`), can't fail
+  (`no-real-assertion`, `swallows-failures`), or check only their mocks (`mocks-everything`);
+* **unreliable tests** may give a different answer on another run: they sleep (`sleeps`), or depend on the order tests
+  run in (`order-dependent`).
+
+For each chosen module it:
 
 1. lists the tests: methods marked `@Test`, `@ParameterizedTest`, `@RepeatedTest`, `@TestFactory` or `@TestTemplate`;
    JUnit 3 tests in classes extending `TestCase` or Spring's JUnit 3 base classes, through superclasses in the repo;
    and Cucumber scenarios and example rows;
-2. runs PMD with under-test's [anti-pattern rules](https://github.com/fiftiesHousewife/under-test/blob/main/tools/test-anti-patterns/anti-patterns.pmd.xml),
-   and PMD's copy-paste detector, in this process (nothing to install);
+2. runs PMD with under-test's [rules for meaningless and unreliable tests](https://github.com/fiftiesHousewife/under-test/blob/main/tools/meaningless-and-unreliable-tests/rules.pmd.xml)
+   in this process (nothing to install);
 3. gives each hit to its test: the method holding it, every test of its class for a hit on the class, every test of
    the class for a sleep in a set-up method; drops a detached-test hit in a JUnit 3 class, and a catch in the
    expected-exception idiom (a `try` ending in `fail(...)`);
 4. adds what PMD can't see: tests in a folder the build doesn't run, tests in a class Maven's test runner doesn't pick
-   up (by its `includes`, or `Test*`, `*Test`, `*Tests`, `*TestCase`, and `*IT` with Failsafe), test classes copied
-   into another test folder, and disabled scenarios;
-5. writes each test found to `testing/tests.yaml`, changing only find-test-anti-patterns' fields and keeping the kinds
-   the skill decides by reading (`reaches-external-system`, the `other-...` kinds) and every other skill's fields;
-6. works the `anti_patterns` section of `testing/assessment.yaml` out from that list, and proposes a decision for each
-   finding.
+   up (by its `includes`, or `Test*`, `*Test`, `*Tests`, `*TestCase`, and `*IT` with Failsafe), and disabled
+   scenarios;
+5. writes each test found to `testing/tests.yaml`, setting only its `meaningless` and `unreliable` lists, keeping the
+   `other-...` kinds the skill decides by reading and every other skill's fields;
+6. works the `meaningless_tests` and `unreliable_tests` sections of `testing/assessment.yaml` out from that list, and
+   proposes a decision for each finding, keyed `meaningless/<kind>` or `unreliable/<kind>`.
 
 ```bash
-java -jar under-test-tools.jar anti-patterns --repo <repo> [--module <folder>]... [--rules <anti-patterns.pmd.xml>]
-java -jar under-test-tools.jar anti-patterns --repo <repo> --summary-only   # after the skill adds its own kinds
+java -jar under-test-tools.jar meaningless-and-unreliable --repo <repo> [--module <folder>]... [--rules <rules.pmd.xml>]
+java -jar under-test-tools.jar meaningless-and-unreliable --repo <repo> --summary-only   # after the skill adds its own kinds
 ```
 
 On under-test's eval example repo it gives the eval's known count for every kind it decides. On Openfire 4.6.0's

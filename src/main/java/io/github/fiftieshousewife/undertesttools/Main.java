@@ -1,6 +1,6 @@
 package io.github.fiftieshousewife.undertesttools;
 
-import io.github.fiftieshousewife.undertesttools.antipatterns.AntiPatternsCommand;
+import io.github.fiftieshousewife.undertesttools.existingtests.MeaninglessAndUnreliableCommand;
 import java.io.UncheckedIOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +19,11 @@ public final class Main {
         java -jar under-test-tools.jar <step> [options]
 
         Steps:
-          anti-patterns   find the anti-patterns a program can decide in a repo's tests, and write them to
-                          testing/tests.yaml and the anti_patterns section of testing/assessment.yaml
-                          (java -jar under-test-tools.jar anti-patterns --help)
+          meaningless-and-unreliable
+                find the meaningless tests (they never run, can't fail, or check only their mocks) and unreliable
+                tests (they sleep, or depend on the order tests run in) a program can decide in a repo's tests, and
+                write them to testing/tests.yaml and the meaningless_tests and unreliable_tests sections of
+                testing/assessment.yaml (java -jar under-test-tools.jar meaningless-and-unreliable --help)
         """;
 
     private Main() {
@@ -55,8 +57,8 @@ public final class Main {
     }
 
     private static int step(final String name, final List<String> rest) {
-        if ("anti-patterns".equals(name)) {
-            return AntiPatternsCommand.run(rest);
+        if ("meaningless-and-unreliable".equals(name)) {
+            return MeaninglessAndUnreliableCommand.run(rest);
         }
         log.error("Unknown step {}\n\n{}", name, USAGE);
         return WRONG_ARGUMENTS;
