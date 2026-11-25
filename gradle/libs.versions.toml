@@ -1,5 +1,4 @@
-# One catalogue for the whole repository; build-logic reads it too. The code-quality tools' versions come with the
-# java-conventions plugin.
+# One catalogue for the whole repository. The code-quality tools' versions come with the java-conventions plugin.
 
 [versions]
 jackson3 = "3.3.0"
@@ -7,16 +6,8 @@ javaparser = "3.28.2"
 # PMD as a library: the meaningless-and-unreliable sub-command runs it in process.
 pmd = "7.29.0"
 
-# Publishing: Maven Central through its Central Portal, and a CycloneDX bill of materials
-nmcp = "1.6.2"
-cyclonedx = "3.6.1"
-
 [libraries]
 jackson3-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson3" }
 jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3" }
 javaparser-core = { module = "com.github.javaparser:javaparser-core", version.ref = "javaparser" }
 pmd-java = { module = "net.sourceforge.pmd:pmd-java", version.ref = "pmd" }
-
-# Gradle plugins build-logic uses for publishing
-gradle-nmcp-plugin = { module = "com.gradleup.nmcp:nmcp", version.ref = "nmcp" }
-gradle-cyclonedx-plugin = { module = "org.cyclonedx:cyclonedx-gradle-plugin", version.ref = "cyclonedx" }

@@ -16,7 +16,6 @@ text, things referred to by name.
 | `src/main/resources/rules.pmd.xml` | A copy of under-test's rules for meaningless and unreliable tests, used when `--rules` isn't given; under-test's is the source |
 | `src/test/resources/sample-repo/` | A copy of the example repo of under-test's find-meaningless-and-unreliable-tests eval, whose known answers the tests check |
 | `src/test/resources/repair-orders-repo/` | `repair-orders`' example repo: a shop's three `testing/` files, and the known answer in `expected/repair-orders.json` |
-| `build-logic/` | How this repo is published (Maven Central, with a bill of materials) |
 | `config/spotbugs-exclude.xml` | This repo's own SpotBugs exclusions, named by `underTest.spotbugsExcludeFilter` in `gradle.properties` |
 
 ## Rules for a sub-command

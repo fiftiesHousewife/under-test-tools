@@ -1,6 +1,4 @@
 pluginManagement {
-    // build-logic holds only how this repo is published; the code standards come from the java-conventions plugin.
-    includeBuild("build-logic")
     repositories {
         gradlePluginPortal() // the java-conventions plugin's own Gradle plugins are only here
         mavenCentral()
