@@ -4,6 +4,7 @@
 plugins {
     id("io.github.fiftieshousewife.java-conventions")
     application
+    alias(libs.plugins.cyclonedx)
 }
 
 dependencies {
@@ -36,3 +37,20 @@ val allInOne = tasks.register<Jar>("allInOneJar") {
 }
 tasks.assemble { dependsOn(allInOne) }
 
+// The software bill of materials: every library the jar holds, which is its runtime class path.
+val bom = tasks.named<org.cyclonedx.gradle.CyclonedxDirectTask>("cyclonedxDirectBom") {
+    includeConfigs = listOf("runtimeClasspath")
+    componentName = "under-test-tools"
+    projectType = org.cyclonedx.model.Component.Type.APPLICATION
+}
+
+// What a release publishes, under its published names: the jar and its bill of materials, in build/release. The
+// release workflow signs them and adds their checksums (see docs/decisions and maintainer-tools/release).
+tasks.register<Copy>("releaseFiles") {
+    group = "build"
+    description = "Puts the jar and its bill of materials in build/release, named for the version."
+    val version = project.version.toString()
+    from(allInOne) { rename { "under-test-tools-$version.jar" } }
+    from(bom.flatMap { it.jsonOutput }) { rename { "under-test-tools-$version-cyclonedx.json" } }
+    into(layout.buildDirectory.dir("release"))
+}

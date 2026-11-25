@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Publishes a release when a version tag (v1.2.3) is pushed, and only if every check passes first: a GitHub release
+# holding the jar, its software bill of materials (CycloneDX), a PGP signature of each, and their SHA-256 checksums
+# (docs/decisions/0007). Start one with maintainer-tools/release/release.sh. Needs these repository secrets:
+#   SIGNING_KEY, SIGNING_KEY_PASSWORD   an ASCII-armoured PGP private key, and its passphrase
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ github.ref_name }}
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Check the tag is the version in gradle.properties, and the signing key is set
+        run: |
+          v="${VERSION#v}"
+          case "$v" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "The tag $VERSION isn't a version such as v1.2.3"; exit 1 ;;
+          esac
+          grep -qx "version=$v" gradle.properties || { echo "gradle.properties doesn't say version=$v"; exit 1; }
+          [ -n "$SIGNING_KEY" ] || { echo "The secret SIGNING_KEY isn't set"; exit 1; }
+      - name: Build the jar and its bill of materials
+        run: ./gradlew releaseFiles
+      - name: Sign them and write their checksums
+        run: |
+          echo "$SIGNING_KEY" | gpg --batch --import
+          cd build/release
+          for file in under-test-tools-*.jar under-test-tools-*-cyclonedx.json; do
+            gpg --batch --yes --pinentry-mode loopback --passphrase "$SIGNING_KEY_PASSWORD" --armor --detach-sign "$file"
+          done
+          sha256sum under-test-tools-* > SHA256SUMS
+      - name: Make the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${VERSION#v}"
+          {
+            # What's new for users, written for this release in the repo; then what every release says.
+            if [ -f "docs/releases/$v.md" ]; then cat "docs/releases/$v.md"; echo; echo "## Published"; echo; fi
+            echo "under-test-tools-$v.jar runs on Java 17 or later: java -jar under-test-tools-$v.jar --help."
+            echo "Its software bill of materials (CycloneDX) lists every library inside it. Each file has a PGP"
+            echo "signature (.asc) beside it, and SHA256SUMS holds their checksums."
+          } > release-notes.md
+          gh release create "$VERSION" --title "$VERSION" --notes-file release-notes.md --verify-tag build/release/*

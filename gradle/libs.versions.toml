@@ -5,9 +5,14 @@ jackson3 = "3.3.0"
 javaparser = "3.28.2"
 # PMD as a library: the meaningless-and-unreliable sub-command runs it in process.
 pmd = "7.29.0"
+# The software bill of materials published beside the jar
+cyclonedx = "3.6.1"
 
 [libraries]
 jackson3-yaml = { module = "tools.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson3" }
 jackson3-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson3" }
 javaparser-core = { module = "com.github.javaparser:javaparser-core", version.ref = "javaparser" }
 pmd-java = { module = "net.sourceforge.pmd:pmd-java", version.ref = "pmd" }
+
+[plugins]
+cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
