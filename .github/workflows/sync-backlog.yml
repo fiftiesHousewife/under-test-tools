@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Brings this repo's GitHub issues up to date with plan/under-test-tools-backlog.yaml after a push that changes it, and
+# commits the refreshed docs/BACKLOG.md. It calls under-test's shared workflow, so every repo of ours uses one importer
+# (docs/decisions/0010).
+name: Backlog sync
+on:
+  push:
+    branches: [main]
+    paths: [plan/under-test-tools-backlog.yaml]
+  workflow_dispatch:
+    inputs:
+      relink:
+        description: Post every issue link again
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  issues: write
+jobs:
+  sync:
+    uses: fiftiesHousewife/under-test/.github/workflows/backlog-sync.yml@main
+    with:
+      backlog-file: plan/under-test-tools-backlog.yaml
+      relink: ${{ inputs.relink == true }}

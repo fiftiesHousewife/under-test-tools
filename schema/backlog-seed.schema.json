@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fiftieshousewife/under-test/schema/backlog-seed.schema.json",
+  "title": "Backlog",
+  "description": "A list of work, imported into an issue tracker by the shared backlog sync workflow.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "items"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "type",
+          "title",
+          "phase",
+          "owner_role",
+          "done_by",
+          "done_when"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "description": "Stable descriptive name; the importer uses it to update rather than duplicate."
+          },
+          "type": {
+            "enum": [
+              "outcome",
+              "deliverable",
+              "task",
+              "decision"
+            ],
+            "description": "outcome: a success criterion agreed with the Programme Sponsor. deliverable: part of an outcome. task: part of a deliverable. decision: a question for a named role, resolved by a decision record."
+          },
+          "title": {
+            "type": "string"
+          },
+          "parent": {
+            "type": "string",
+            "description": "Key of the parent item."
+          },
+          "phase": {
+            "enum": [
+              "set-up",
+              "finding-out-what-repos-we-have",
+              "pilots",
+              "rolling-out-in-batches",
+              "handing-over",
+              "future"
+            ]
+          },
+          "horizon": {
+            "enum": [
+              "now",
+              "next",
+              "later"
+            ]
+          },
+          "owner_role": {
+            "enum": [
+              "Programme Sponsor",
+              "Engagement Lead",
+              "Forward Deployed Engineer",
+              "Technical Architect",
+              "Test Quality Lead",
+              "Security and Platform Owner",
+              "Application Owner",
+              "Toolkit Owner",
+              "Steering Group"
+            ]
+          },
+          "done_by": {
+            "enum": [
+              "tool",
+              "ai",
+              "person"
+            ],
+            "description": "tool: an automated, repeatable tool. ai: a person with AI coding assistance; the AI drafts, the person reviews, an automated check must pass. person: a human decision or activity."
+          },
+          "done_when": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_by": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Keys of items that must be finished first."
+          },
+          "decision_record": {
+            "type": "string",
+            "description": "For decision items: path of the decision record that resolves it."
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "done"
+            ],
+            "description": "done: the work is finished; importers close the item as completed. Omitted means open."
+          }
+        }
+      }
+    }
+  }
+}

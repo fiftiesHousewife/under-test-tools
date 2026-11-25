@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://microsoft.github.io/apm/specs/schemas/manifest-v0.1.schema.json
+# AI assistant skills this repo depends on, installed with APM (Agent Package Manager): `apm install`.
+# Pinned to a tag or commit; apm.lock.yaml records exact versions. This repo's own skills are in .github/skills/.
+name: under-test-tools
+version: 0.1.0
+targets: [claude, copilot]
+dependencies:
+  apm:
+    # Interview a person about a decision, one round of questions at a time (Matt Pocock, MIT licence).
+    - mattpocock/skills/skills/productivity/grilling#v1.3.2
+    # Write decision records in MADR form (wshobson/agents, MIT licence).
+    - git: wshobson/agents
+      path: plugins/documentation-generation/skills/architecture-decision-records
+      ref: 42203085cfc5736204bf0f6d436dff7e1da0bf3f
