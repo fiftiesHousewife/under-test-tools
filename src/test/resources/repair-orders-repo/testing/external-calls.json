@@ -1,0 +1,527 @@
+{
+  "classpath_notes": [],
+  "connection_points": [
+    {
+      "address": {
+        "source": "setting",
+        "value": "spring.datasource.url",
+        "via": "@Value"
+      },
+      "call": "java.sql.DriverManager#getConnection",
+      "file": "./src/main/java/com/example/shop/OrderStore.java",
+      "kind": "database",
+      "line": 22,
+      "method": "com.example.shop.OrderStore#connect()"
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "mail.host",
+        "via": "@Value",
+        "setting_value": "smtp.example.com",
+        "setting_file": "src/main/resources/application.properties",
+        "setting_line": 4
+      },
+      "call": "jakarta.mail.Transport#send",
+      "file": "./src/main/java/com/example/shop/Mailer.java",
+      "kind": "mail",
+      "line": 31,
+      "method": "com.example.shop.Mailer#send(Mail)"
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "payments.url",
+        "via": "@Value",
+        "setting_value": "https://payments.example.com",
+        "setting_file": "src/main/resources/application.properties",
+        "setting_line": 2
+      },
+      "call": "java.net.URL#openConnection",
+      "file": "./src/main/java/com/example/shop/PaymentClient.java",
+      "kind": "url",
+      "line": 40,
+      "method": "com.example.shop.PaymentClient#post(String)"
+    },
+    {
+      "address": {
+        "source": "parameter",
+        "value": "url of get"
+      },
+      "call": "java.net.http.HttpClient#send",
+      "file": "./src/main/java/com/example/shop/RestClient.java",
+      "kind": "http",
+      "line": 18,
+      "method": "com.example.shop.RestClient#get(String)"
+    },
+    {
+      "address": {
+        "source": "literal",
+        "value": "http://tax.internal:8080/rates",
+        "written_at": {
+          "file": "./src/main/java/com/example/shop/TaxClient.java",
+          "line": 12
+        }
+      },
+      "call": "java.net.http.HttpClient#send",
+      "file": "./src/main/java/com/example/shop/TaxClient.java",
+      "kind": "http",
+      "line": 15,
+      "method": "com.example.shop.TaxClient#rates()"
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "fx.host",
+        "via": "@Value",
+        "setting_value": "fx.example.com",
+        "setting_file": "src/main/resources/application.properties",
+        "setting_line": 6
+      },
+      "call": "java.net.Socket#<init>",
+      "file": "./src/main/java/com/example/shop/FxFeed.java",
+      "kind": "socket",
+      "line": 27,
+      "method": "com.example.shop.FxFeed#open()"
+    }
+  ],
+  "dispatch_points_not_followed": [],
+  "not_resolved": [],
+  "schema": "external-calls/1",
+  "summary": {
+    "calls_not_resolved": 0,
+    "calls_resolved": 120,
+    "files": 24,
+    "files_not_parsed": 0,
+    "methods": 140,
+    "tests": 40,
+    "tests_reaching": 13,
+    "tests_starting_a_framework": 1
+  },
+  "systems": [
+    {
+      "address": {
+        "source": "setting",
+        "value": "fx.host"
+      },
+      "alternatives": [],
+      "kinds": [
+        "socket"
+      ],
+      "name": "fx.example.com",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.FxFeed#open()"
+      ],
+      "tests": 1
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "payments.url"
+      },
+      "alternatives": [],
+      "kinds": [
+        "http",
+        "url"
+      ],
+      "name": "payments.example.com",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.PaymentClient#post(String)"
+      ],
+      "tests": 3
+    },
+    {
+      "address": {
+        "source": "literal",
+        "value": "https://price.example.com",
+        "written_at": {
+          "file": "./src/test/java/com/example/shop/CatalogueTest.java",
+          "line": 12
+        }
+      },
+      "alternatives": [],
+      "kinds": [
+        "http"
+      ],
+      "name": "price.example.com",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.RestClient#get(String)"
+      ],
+      "tests": 1
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "mail.host"
+      },
+      "alternatives": [],
+      "kinds": [
+        "mail"
+      ],
+      "name": "smtp.example.com",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.Mailer#send(Mail)"
+      ],
+      "tests": 2
+    },
+    {
+      "address": {
+        "source": "setting",
+        "value": "spring.datasource.url"
+      },
+      "alternatives": [],
+      "kinds": [
+        "database"
+      ],
+      "name": "spring.datasource.url",
+      "named_by": "setting",
+      "points": [
+        "com.example.shop.OrderStore#connect()"
+      ],
+      "tests": 3
+    },
+    {
+      "address": {
+        "source": "parameter",
+        "value": "url of get"
+      },
+      "alternatives": [],
+      "kinds": [
+        "http"
+      ],
+      "name": "stock.example.com",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.RestClient#get(String)"
+      ],
+      "tests": 1
+    },
+    {
+      "address": {
+        "source": "literal",
+        "value": "http://tax.internal:8080/rates",
+        "written_at": {
+          "file": "./src/main/java/com/example/shop/TaxClient.java",
+          "line": 12
+        }
+      },
+      "alternatives": [],
+      "kinds": [
+        "http"
+      ],
+      "name": "tax.internal",
+      "named_by": "host",
+      "points": [
+        "com.example.shop.TaxClient#rates()"
+      ],
+      "tests": 1
+    }
+  ],
+  "tests": [
+    {
+      "file": "./src/test/java/com/example/shop/CatalogueTest.java",
+      "line": 14,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.CatalogueTest#showsAProduct()",
+            "com.example.shop.Catalogue#product(String)",
+            "com.example.shop.RestClient#get(String)"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.RestClient#get(String)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "price.example.com",
+        "stock.example.com"
+      ],
+      "test": "com.example.shop.CatalogueTest.showsAProduct"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/CheckoutIT.java",
+      "line": 21,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.CheckoutIT#checksOut()",
+            "com.example.shop.PaymentClient#charge(Money)",
+            "com.example.shop.PaymentClient#post(String)"
+          ],
+          "kind": "url",
+          "point": "com.example.shop.PaymentClient#post(String)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "payments.example.com"
+      ],
+      "test": "com.example.shop.CheckoutIT.checksOut"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/FxRatesTest.java",
+      "line": 10,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.FxRatesTest#readsTheRates()",
+            "com.example.shop.FxFeed#latest()",
+            "com.example.shop.FxFeed#open()"
+          ],
+          "kind": "socket",
+          "point": "com.example.shop.FxFeed#open()",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "fx.example.com"
+      ],
+      "test": "com.example.shop.FxRatesTest.readsTheRates"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/NotificationTest.java",
+      "line": 18,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.NotificationTest#sendsAReceipt()",
+            "com.example.shop.NotificationTest#mailer()",
+            "com.example.shop.Mailer#send(Mail)"
+          ],
+          "kind": "mail",
+          "point": "com.example.shop.Mailer#send(Mail)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [
+        "com.icegreen.greenmail.junit5.GreenMailExtension"
+      ],
+      "systems": [
+        "smtp.example.com"
+      ],
+      "test": "com.example.shop.NotificationTest.sendsAReceipt"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/OrderRepositoryTest.java",
+      "line": 40,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.OrderRepositoryTest#countsOrders()",
+            "com.example.shop.OrderRepository#count()",
+            "com.example.shop.OrderStore#connect()"
+          ],
+          "kind": "database",
+          "point": "com.example.shop.OrderStore#connect()",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "spring.datasource.url"
+      ],
+      "test": "com.example.shop.OrderRepositoryTest.countsOrders"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/OrderRepositoryTest.java",
+      "line": 30,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.OrderRepositoryTest#findsAnOrder()",
+            "com.example.shop.OrderRepository#find(String)",
+            "com.example.shop.OrderStore#connect()"
+          ],
+          "kind": "database",
+          "point": "com.example.shop.OrderStore#connect()",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "spring.datasource.url"
+      ],
+      "test": "com.example.shop.OrderRepositoryTest.findsAnOrder"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/OrderRepositoryTest.java",
+      "line": 20,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.OrderRepositoryTest#savesAnOrder()",
+            "com.example.shop.OrderRepository#save(Order)",
+            "com.example.shop.OrderStore#connect()"
+          ],
+          "kind": "database",
+          "point": "com.example.shop.OrderStore#connect()",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "spring.datasource.url"
+      ],
+      "test": "com.example.shop.OrderRepositoryTest.savesAnOrder"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/PaymentTest.java",
+      "line": 16,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.PaymentTest#chargesTheCard()",
+            "com.example.shop.PaymentService#pay(Order)",
+            "com.example.shop.PaymentClient#charge(Money)",
+            "com.example.shop.PaymentClient#post(String)"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.PaymentClient#post(String)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "payments.example.com"
+      ],
+      "test": "com.example.shop.PaymentTest.chargesTheCard"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/RefundTest.java",
+      "line": 25,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.RefundTest#refundsTheCard()",
+            "com.example.shop.RefundTest#signIn()",
+            "com.example.shop.PaymentClient#charge(Money)",
+            "com.example.shop.PaymentClient#post(String)"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.PaymentClient#post(String)",
+          "through_set_up": true,
+          "through_mock": "com.example.shop.AuditLog#record(String)"
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "payments.example.com"
+      ],
+      "test": "com.example.shop.RefundTest.refundsTheCard"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/ReportTest.java",
+      "line": 12,
+      "reaches": [
+        {
+          "address_for_tests": "run-time",
+          "chain": [
+            "com.example.shop.ReportTest#mailsTheReport()",
+            "com.example.shop.ReportJob#run()",
+            "com.example.shop.Mailer#send(Mail)"
+          ],
+          "kind": "mail",
+          "point": "com.example.shop.Mailer#send(Mail)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "smtp.example.com"
+      ],
+      "test": "com.example.shop.ReportTest.mailsTheReport"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/ShippingTest.java",
+      "line": 12,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.ShippingTest#quotesAShipment()",
+            "com.example.shop.PaymentClient#charge(Money)",
+            "com.example.shop.PaymentClient#post(String)"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.PaymentClient#post(String)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "payments.example.com"
+      ],
+      "test": "com.example.shop.ShippingTest.quotesAShipment"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/TaxTest.java",
+      "line": 11,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.TaxTest#addsTheTax()",
+            "com.example.shop.TaxCalculator#add(Money)",
+            "com.example.shop.TaxClient#rates()"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.TaxClient#rates()",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "tax.internal"
+      ],
+      "test": "com.example.shop.TaxTest.addsTheTax"
+    },
+    {
+      "file": "./src/test/java/com/example/shop/TaxTest.java",
+      "line": 35,
+      "reaches": [
+        {
+          "address_for_tests": "host",
+          "chain": [
+            "com.example.shop.TaxTest#opensTheRatesPage()",
+            "com.example.shop.TaxTest#open(String)"
+          ],
+          "kind": "http",
+          "point": "com.example.shop.TaxTest#open(String)",
+          "through_set_up": false
+        }
+      ],
+      "stand_ins": [],
+      "systems": [
+        "tax.internal"
+      ],
+      "test": "com.example.shop.TaxTest.opensTheRatesPage"
+    }
+  ],
+  "tests_starting_a_framework": [
+    {
+      "annotated_on": "com.example.shop.CheckoutIT",
+      "file": "./src/test/java/com/example/shop/CheckoutIT.java",
+      "framework": "@SpringBootTest",
+      "line": 21,
+      "test": "com.example.shop.CheckoutIT.checksOut"
+    }
+  ],
+  "tool_version": "0.1.0"
+}

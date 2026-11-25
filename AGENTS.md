@@ -12,8 +12,10 @@ text, things referred to by name.
 |---|---|
 | `src/main/java/.../undertesttools/Main.java` | Chooses the sub-command |
 | `src/main/java/.../undertesttools/existingtests/` | `meaningless-and-unreliable`, which finds a repo's meaningless tests (they never run, can't fail, or check only their mocks) and unreliable tests (they sleep, or depend on the order tests run in): `SourceIndex` and `TestFolders` list the tests, `PmdRunner` runs PMD, `Finder` gives hits to tests, `TestList` holds the two lists' kinds, `TestsFile`, `AssessmentFile` and `Decisions` write the files |
+| `src/main/java/.../undertesttools/repairorders/` | `repair-orders`, which joins `testing/external-calls.json`, `testing/tests.yaml` and `testing/external-systems.calm.json` into `testing/repair-orders.json`, one work order per external system: `Inputs` reads the three (`Facts`, `SystemsList`), `Grouping` sorts the tests into orders and those left out, `OrderedTest`, `Reaches` and `Injection` write each test's part, `SharedChain` the chain they share, `Orders` the file |
 | `src/main/resources/rules.pmd.xml` | A copy of under-test's rules for meaningless and unreliable tests, used when `--rules` isn't given; under-test's is the source |
 | `src/test/resources/sample-repo/` | A copy of the example repo of under-test's find-meaningless-and-unreliable-tests eval, whose known answers the tests check |
+| `src/test/resources/repair-orders-repo/` | `repair-orders`' example repo: a shop's three `testing/` files, and the known answer in `expected/repair-orders.json` |
 | `build-logic/` | How this repo is published (Maven Central, with a bill of materials) |
 | `config/spotbugs-exclude.xml` | This repo's own SpotBugs exclusions, named by `underTest.spotbugsExcludeFilter` in `gradle.properties` |
 

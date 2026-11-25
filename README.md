@@ -51,6 +51,30 @@ On under-test's eval example repo it gives the eval's known count for every kind
 `xmppserver` module (415 tests) it takes about two seconds, and found, among others, four tests Maven never runs
 because their class's name doesn't end in `Test`.
 
+## repair-orders
+
+The repair skill's mechanical step
+([under-test's decision](https://github.com/fiftiesHousewife/under-test/blob/main/docs/decisions/0095-repair-is-directed-by-a-work-order-per-external-system-that-under-test-tools-writes.md)).
+It joins `testing/external-calls.json` (under-test-external-calls' facts), `testing/tests.yaml` and
+`testing/external-systems.calm.json` into `testing/repair-orders.json`, as
+[its schema](https://github.com/fiftiesHousewife/under-test/blob/main/schema/repair-orders.schema.json) says:
+
+* an order for each external system with a test graded `reaches` that isn't disabled and whose `repair` is absent or
+  `waiting`, giving the system's stand-in, where its address comes from, and the chain its tests share;
+* for each test in an order, once per kind of connection: where the stand-in goes (`framework-settings`, `field`,
+  `set-up`, `test-body`, or `not-known` when the facts have no chain for it), the first call into other code and the
+  type to replace, its chain, the stand-ins it already uses, the evidence that it reaches the system with the hosts
+  its own code names, and what it waits for (`stand-in-not-chosen`, `address-in-code`);
+* every other test that reaches or called out, in `not_ordered`, with why: `may-reach`, `missed-by-discovery`,
+  `paired`, `no-node` or `disabled`.
+
+It only joins and copies. The same inputs give the same file, byte for byte. On jsoup 1.15.3 it gives one order, for
+the HTTP client, holding 45 tests, each with the hosts its test names.
+
+```bash
+java -jar under-test-tools.jar repair-orders --repo <repo> [--testing <folder>]
+```
+
 ## Building
 
 Java 17 or later to run it; `./gradlew check` runs the tests and the code standards, and `./gradlew allInOneJar` builds

@@ -1,0 +1,343 @@
+{
+  "$schema": "https://calm.finos.org/release/1.3/meta/calm.json",
+  "nodes": [
+    {
+      "unique-id": "shop",
+      "node-type": "service",
+      "name": "Shop",
+      "description": "Shop.",
+      "metadata": {
+        "under-test": {}
+      }
+    },
+    {
+      "unique-id": "payments-api",
+      "node-type": "service",
+      "name": "Payments API",
+      "description": "Payments API.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "https://payments.example.com",
+            "https://payments-sandbox.example.com"
+          ],
+          "opened-by": [
+            "com.example.shop.PaymentClient#post(String)"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "orders-db",
+      "node-type": "database",
+      "name": "Orders database",
+      "description": "Orders database.",
+      "metadata": {
+        "under-test": {
+          "address-from": "setting spring.datasource.url, with no value",
+          "opened-by": [
+            "com.example.shop.OrderStore#connect()"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "mail-server",
+      "node-type": "service",
+      "name": "Mail server",
+      "description": "Mail server.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "smtp.example.com:25"
+          ],
+          "opened-by": [
+            "com.example.shop.Mailer#send(Mail)"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "tax-service",
+      "node-type": "service",
+      "name": "Tax service",
+      "description": "Tax service.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "http://tax.internal:8080"
+          ],
+          "opened-by": [
+            "com.example.shop.TaxClient#rates()"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "price-api",
+      "node-type": "service",
+      "name": "Price API",
+      "description": "Price API.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "https://price.example.com"
+          ],
+          "opened-by": [
+            "com.example.shop.RestClient#get(String)"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "stock-api",
+      "node-type": "service",
+      "name": "Stock API",
+      "description": "Stock API.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "https://stock.example.com"
+          ],
+          "opened-by": [
+            "com.example.shop.RestClient#get(String)"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "payments-sandbox-example-com",
+      "node-type": "service",
+      "name": "payments-sandbox.example.com",
+      "description": "The payments sandbox the tests name.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "payments-sandbox.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "unique-id": "fx-rates-feed",
+      "node-type": "service",
+      "name": "FX rates feed",
+      "description": "The currency rates feed, over a socket.",
+      "metadata": {
+        "under-test": {
+          "addresses": [
+            "fx.example.com:7000"
+          ],
+          "opened-by": [
+            "com.example.shop.FxFeed#open()"
+          ]
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "unique-id": "shop-to-payments-api",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "payments-api"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "decided",
+          "by": "Architecture Owner",
+          "stand-in": {
+            "approach": "recorded-responses",
+            "kit": "payments-test-kit"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-orders-db",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "orders-db"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "proposed",
+          "stand-in": {
+            "approach": "run-in-container"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-mail-server",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "mail-server"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "proposed",
+          "stand-in": {
+            "approach": "not-chosen"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-tax-service",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "tax-service"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "proposed",
+          "stand-in": {
+            "approach": "contract"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-price-api",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "price-api"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "decided",
+          "by": "Architecture Owner",
+          "stand-in": {
+            "approach": "fake-behind-an-interface"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-stock-api",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "stock-api"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "decided",
+          "by": "Architecture Owner",
+          "stand-in": {
+            "approach": "fake-behind-an-interface"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-payments-sandbox-example-com",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "payments-sandbox-example-com"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "proposed",
+          "stand-in": {
+            "approach": "recorded-responses"
+          }
+        }
+      }
+    },
+    {
+      "unique-id": "shop-to-fx-rates-feed",
+      "relationship-type": {
+        "connects": {
+          "source": {
+            "node": "shop"
+          },
+          "destination": {
+            "node": "fx-rates-feed"
+          }
+        }
+      },
+      "metadata": {
+        "under-test": {
+          "found-by": [
+            "code"
+          ],
+          "state": "proposed",
+          "stand-in": {
+            "approach": "in-process-server"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "under-test": {
+      "application": "Shop",
+      "node": "shop",
+      "commit": "5e6f7a8"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fiftiesHousewife/under-test/main/schema/tests.schema.json
+schema: tests/1
+found_by:
+  draft-the-external-systems-list:
+    version: "0.4.0"
+    commit: "5e6f7a8"
+  find-meaningless-and-unreliable-tests:
+    version: "0.4.0"
+    commit: "5e6f7a8"
+tests:
+  - test: "com.example.shop.CatalogueTest.showsAProduct"
+    at: "src/test/java/com/example/shop/CatalogueTest.java:14"
+    external_systems:
+      - {node: stock-api, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+      - {node: price-api, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.CheckoutIT.checksOut"
+    at: "src/test/java/com/example/shop/CheckoutIT.java:21"
+    external_systems:
+      - {node: payments-api, kind: url, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+    measurement:
+      outcome: left-out
+      called: ["search.example.com:443", "payments.example.com:443"]
+      missed_by_discovery: true
+  - test: "com.example.shop.FxRatesTest.readsTheRates"
+    at: "src/test/java/com/example/shop/FxRatesTest.java:10"
+    external_systems:
+      - {node: fx-rates-feed, kind: socket, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.LegacyExportTest.exportsTheDay"
+    at: "src/test/java/com/example/shop/LegacyExportTest.java:9"
+    external_systems:
+      - {node: ftp-server, kind: url, found_by: test-settings, grade: reaches, reason: host, where: "src/test/resources/export.properties:2"}
+  - test: "com.example.shop.NotificationTest.sendsAReceipt"
+    at: "src/test/java/com/example/shop/NotificationTest.java:18"
+    external_systems:
+      - {node: mail-server, kind: mail, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+    repair:
+      state: waiting
+      waits_for: stand-in-not-chosen
+  - test: "com.example.shop.OrderRepositoryTest.countsOrders"
+    at: "src/test/java/com/example/shop/OrderRepositoryTest.java:40"
+    external_systems:
+      - {node: orders-db, kind: database, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+    repair:
+      state: paired
+      pair: "OrderRepositoryContract, OrderRepositoryContainerTest, OrderRepositoryExternalTest"
+  - test: "com.example.shop.OrderRepositoryTest.findsAnOrder"
+    at: "src/test/java/com/example/shop/OrderRepositoryTest.java:30"
+    external_systems:
+      - {node: orders-db, kind: database, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.OrderRepositoryTest.savesAnOrder"
+    at: "src/test/java/com/example/shop/OrderRepositoryTest.java:20"
+    external_systems:
+      - {node: orders-db, kind: database, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.PaymentTest.chargesTheCard"
+    at: "src/test/java/com/example/shop/PaymentTest.java:16"
+    external_systems:
+      - {node: payments-api, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+      - {node: payments-sandbox-example-com, kind: http, found_by: test-code, grade: reaches, reason: host, where: "src/test/java/com/example/shop/PaymentTest.java:17"}
+    measurement:
+      outcome: left-out
+      left_out_because: "payments-api, reaches"
+  - test: "com.example.shop.PriceRoundingTest.roundsHalfUp"
+    at: "src/test/java/com/example/shop/PriceRoundingTest.java:8"
+    external_systems:
+      - {node: orders-db, kind: database, found_by: code-path, grade: cannot-reach, reason: local, through_set_up: false}
+  - test: "com.example.shop.RefundTest.refundsTheCard"
+    at: "src/test/java/com/example/shop/RefundTest.java:25"
+    external_systems:
+      - {node: payments-api, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: true}
+  - test: "com.example.shop.ReportTest.mailsTheReport"
+    at: "src/test/java/com/example/shop/ReportTest.java:12"
+    external_systems:
+      - {node: mail-server, kind: mail, found_by: code-path, grade: may-reach, reason: run-time, through_set_up: false}
+  - test: "com.example.shop.ShippingTest.quotesAShipment"
+    at: "src/test/java/com/example/shop/ShippingTest.java:12"
+    meaningless: [disabled]
+    external_systems:
+      - {node: payments-api, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.StockLevelTest.reservesStock"
+    at: "src/test/java/com/example/shop/StockLevelTest.java:9"
+    measurement:
+      outcome: passed
+      runs: "PPP"
+      called: ["inventory.example.com:443"]
+      missed_by_discovery: true
+  - test: "com.example.shop.TaxTest.addsTheTax"
+    at: "src/test/java/com/example/shop/TaxTest.java:11"
+    external_systems:
+      - {node: tax-service, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.TaxTest.opensTheRatesPage"
+    at: "src/test/java/com/example/shop/TaxTest.java:35"
+    external_systems:
+      - {node: tax-service, kind: http, found_by: code-path, grade: reaches, reason: host, through_set_up: false}
+  - test: "com.example.shop.TaxTest.readsTheSandboxRates"
+    at: "src/test/java/com/example/shop/TaxTest.java:27"
+    external_systems:
+      - {node: tax-service, kind: http, found_by: test-code, grade: reaches, reason: host, where: "src/test/java/com/example/shop/TaxTest.java:29"}

@@ -1,6 +1,7 @@
 package io.github.fiftieshousewife.undertesttools;
 
 import io.github.fiftieshousewife.undertesttools.existingtests.MeaninglessAndUnreliableCommand;
+import io.github.fiftieshousewife.undertesttools.repairorders.RepairOrdersCommand;
 import java.io.UncheckedIOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,10 @@ public final class Main {
                 tests (they sleep, or depend on the order tests run in) a program can decide in a repo's tests, and
                 write them to testing/tests.yaml and the meaningless_tests and unreliable_tests sections of
                 testing/assessment.yaml (java -jar under-test-tools.jar meaningless-and-unreliable --help)
+          repair-orders
+                join testing/external-calls.json, testing/tests.yaml and testing/external-systems.calm.json into
+                testing/repair-orders.json, one work order per external system whose tests repair must pair
+                (java -jar under-test-tools.jar repair-orders --help)
         """;
 
     private Main() {
@@ -59,6 +64,9 @@ public final class Main {
     private static int step(final String name, final List<String> rest) {
         if ("meaningless-and-unreliable".equals(name)) {
             return MeaninglessAndUnreliableCommand.run(rest);
+        }
+        if ("repair-orders".equals(name)) {
+            return RepairOrdersCommand.run(rest);
         }
         log.error("Unknown step {}\n\n{}", name, USAGE);
         return WRONG_ARGUMENTS;

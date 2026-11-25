@@ -1,0 +1,358 @@
+{
+  "schema" : "repair-orders/1",
+  "tool_version" : "unreleased",
+  "made_from" : {
+    "external_calls" : {
+      "schema" : "external-calls/1",
+      "tool_version" : "0.1.0"
+    },
+    "tests" : {
+      "version" : "0.4.0",
+      "commit" : "5e6f7a8"
+    },
+    "external_systems" : "testing/external-systems.calm.json"
+  },
+  "orders" : [ {
+    "node" : "fx-rates-feed",
+    "kind" : "socket",
+    "name" : "FX rates feed",
+    "stand_in" : {
+      "approach" : "in-process-server",
+      "state" : "proposed"
+    },
+    "address_from" : "fx.example.com:7000",
+    "shared_chain" : [ "com.example.shop.FxFeed#latest()", "com.example.shop.FxFeed#open()" ],
+    "tests" : [ {
+      "test" : "com.example.shop.FxRatesTest.readsTheRates",
+      "class" : "com.example.shop.FxRatesTest",
+      "method" : "readsTheRates",
+      "at" : "src/test/java/com/example/shop/FxRatesTest.java:10",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.FxFeed#latest()",
+        "client_type" : "com.example.shop.FxFeed"
+      },
+      "chain" : [ "com.example.shop.FxRatesTest#readsTheRates()", "com.example.shop.FxFeed#latest()", "com.example.shop.FxFeed#open()" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    } ]
+  }, {
+    "node" : "mail-server",
+    "kind" : "mail",
+    "name" : "Mail server",
+    "stand_in" : {
+      "approach" : "not-chosen",
+      "state" : "proposed"
+    },
+    "address_from" : "smtp.example.com:25",
+    "shared_chain" : [ ],
+    "tests" : [ {
+      "test" : "com.example.shop.NotificationTest.sendsAReceipt",
+      "class" : "com.example.shop.NotificationTest",
+      "method" : "sendsAReceipt",
+      "at" : "src/test/java/com/example/shop/NotificationTest.java:18",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.Mailer#send(Mail)",
+        "client_type" : "com.example.shop.Mailer"
+      },
+      "chain" : [ "com.example.shop.NotificationTest#sendsAReceipt()", "com.example.shop.NotificationTest#mailer()", "com.example.shop.Mailer#send(Mail)" ],
+      "through_mock" : false,
+      "stand_ins" : [ "com.icegreen.greenmail.junit5.GreenMailExtension" ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      },
+      "waits_for" : "stand-in-not-chosen"
+    } ]
+  }, {
+    "node" : "orders-db",
+    "kind" : "database",
+    "name" : "Orders database",
+    "stand_in" : {
+      "approach" : "run-in-container",
+      "state" : "proposed"
+    },
+    "address_from" : "setting spring.datasource.url, with no value",
+    "shared_chain" : [ ],
+    "tests" : [ {
+      "test" : "com.example.shop.OrderRepositoryTest.findsAnOrder",
+      "class" : "com.example.shop.OrderRepositoryTest",
+      "method" : "findsAnOrder",
+      "at" : "src/test/java/com/example/shop/OrderRepositoryTest.java:30",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.OrderRepository#find(String)",
+        "client_type" : "com.example.shop.OrderRepository"
+      },
+      "chain" : [ "com.example.shop.OrderRepositoryTest#findsAnOrder()", "com.example.shop.OrderRepository#find(String)", "com.example.shop.OrderStore#connect()" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    }, {
+      "test" : "com.example.shop.OrderRepositoryTest.savesAnOrder",
+      "class" : "com.example.shop.OrderRepositoryTest",
+      "method" : "savesAnOrder",
+      "at" : "src/test/java/com/example/shop/OrderRepositoryTest.java:20",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.OrderRepository#save(Order)",
+        "client_type" : "com.example.shop.OrderRepository"
+      },
+      "chain" : [ "com.example.shop.OrderRepositoryTest#savesAnOrder()", "com.example.shop.OrderRepository#save(Order)", "com.example.shop.OrderStore#connect()" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    } ]
+  }, {
+    "node" : "payments-api",
+    "kind" : "http",
+    "name" : "Payments API",
+    "stand_in" : {
+      "approach" : "recorded-responses",
+      "kit" : "payments-test-kit",
+      "state" : "decided"
+    },
+    "address_from" : "https://payments.example.com, https://payments-sandbox.example.com",
+    "shared_chain" : [ "com.example.shop.PaymentClient#charge(Money)", "com.example.shop.PaymentClient#post(String)" ],
+    "tests" : [ {
+      "test" : "com.example.shop.CheckoutIT.checksOut",
+      "class" : "com.example.shop.CheckoutIT",
+      "method" : "checksOut",
+      "at" : "src/test/java/com/example/shop/CheckoutIT.java:21",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "framework-settings",
+        "method" : "com.example.shop.PaymentClient#charge(Money)",
+        "client_type" : "com.example.shop.PaymentClient"
+      },
+      "chain" : [ "com.example.shop.CheckoutIT#checksOut()", "com.example.shop.PaymentClient#charge(Money)", "com.example.shop.PaymentClient#post(String)" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "called" : [ "payments.example.com:443", "search.example.com:443" ],
+        "missed_by_discovery" : true
+      }
+    }, {
+      "test" : "com.example.shop.PaymentTest.chargesTheCard",
+      "class" : "com.example.shop.PaymentTest",
+      "method" : "chargesTheCard",
+      "at" : "src/test/java/com/example/shop/PaymentTest.java:16",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.PaymentService#pay(Order)",
+        "client_type" : "com.example.shop.PaymentService"
+      },
+      "chain" : [ "com.example.shop.PaymentTest#chargesTheCard()", "com.example.shop.PaymentService#pay(Order)", "com.example.shop.PaymentClient#charge(Money)", "com.example.shop.PaymentClient#post(String)" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false,
+        "named_hosts" : [ "payments-sandbox-example-com" ]
+      }
+    }, {
+      "test" : "com.example.shop.RefundTest.refundsTheCard",
+      "class" : "com.example.shop.RefundTest",
+      "method" : "refundsTheCard",
+      "at" : "src/test/java/com/example/shop/RefundTest.java:25",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "set-up",
+        "method" : "com.example.shop.PaymentClient#charge(Money)",
+        "client_type" : "com.example.shop.PaymentClient"
+      },
+      "chain" : [ "com.example.shop.RefundTest#refundsTheCard()", "com.example.shop.RefundTest#signIn()", "com.example.shop.PaymentClient#charge(Money)", "com.example.shop.PaymentClient#post(String)" ],
+      "through_mock" : "com.example.shop.AuditLog#record(String)",
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    } ]
+  }, {
+    "node" : "price-api",
+    "kind" : "http",
+    "name" : "Price API",
+    "stand_in" : {
+      "approach" : "fake-behind-an-interface",
+      "state" : "decided"
+    },
+    "address_from" : "https://price.example.com",
+    "shared_chain" : [ "com.example.shop.Catalogue#product(String)", "com.example.shop.RestClient#get(String)" ],
+    "tests" : [ {
+      "test" : "com.example.shop.CatalogueTest.showsAProduct",
+      "class" : "com.example.shop.CatalogueTest",
+      "method" : "showsAProduct",
+      "at" : "src/test/java/com/example/shop/CatalogueTest.java:14",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.Catalogue#product(String)",
+        "client_type" : "com.example.shop.Catalogue"
+      },
+      "chain" : [ "com.example.shop.CatalogueTest#showsAProduct()", "com.example.shop.Catalogue#product(String)", "com.example.shop.RestClient#get(String)" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    } ]
+  }, {
+    "node" : "stock-api",
+    "kind" : "http",
+    "name" : "Stock API",
+    "stand_in" : {
+      "approach" : "fake-behind-an-interface",
+      "state" : "decided"
+    },
+    "address_from" : "https://stock.example.com",
+    "shared_chain" : [ "com.example.shop.Catalogue#product(String)", "com.example.shop.RestClient#get(String)" ],
+    "tests" : [ {
+      "test" : "com.example.shop.CatalogueTest.showsAProduct",
+      "class" : "com.example.shop.CatalogueTest",
+      "method" : "showsAProduct",
+      "at" : "src/test/java/com/example/shop/CatalogueTest.java:14",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.Catalogue#product(String)",
+        "client_type" : "com.example.shop.Catalogue"
+      },
+      "chain" : [ "com.example.shop.CatalogueTest#showsAProduct()", "com.example.shop.Catalogue#product(String)", "com.example.shop.RestClient#get(String)" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      }
+    } ]
+  }, {
+    "node" : "tax-service",
+    "kind" : "http",
+    "name" : "Tax service",
+    "stand_in" : {
+      "approach" : "contract",
+      "state" : "proposed"
+    },
+    "address_from" : "http://tax.internal:8080",
+    "shared_chain" : [ ],
+    "tests" : [ {
+      "test" : "com.example.shop.TaxTest.addsTheTax",
+      "class" : "com.example.shop.TaxTest",
+      "method" : "addsTheTax",
+      "at" : "src/test/java/com/example/shop/TaxTest.java:11",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body",
+        "method" : "com.example.shop.TaxCalculator#add(Money)",
+        "client_type" : "com.example.shop.TaxCalculator"
+      },
+      "chain" : [ "com.example.shop.TaxTest#addsTheTax()", "com.example.shop.TaxCalculator#add(Money)", "com.example.shop.TaxClient#rates()" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      },
+      "waits_for" : "address-in-code"
+    }, {
+      "test" : "com.example.shop.TaxTest.opensTheRatesPage",
+      "class" : "com.example.shop.TaxTest",
+      "method" : "opensTheRatesPage",
+      "at" : "src/test/java/com/example/shop/TaxTest.java:35",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "test-body"
+      },
+      "chain" : [ "com.example.shop.TaxTest#opensTheRatesPage()", "com.example.shop.TaxTest#open(String)" ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "code-path",
+        "missed_by_discovery" : false
+      },
+      "waits_for" : "address-in-code"
+    }, {
+      "test" : "com.example.shop.TaxTest.readsTheSandboxRates",
+      "class" : "com.example.shop.TaxTest",
+      "method" : "readsTheSandboxRates",
+      "at" : "src/test/java/com/example/shop/TaxTest.java:27",
+      "framework" : "unknown",
+      "inject" : {
+        "where" : "not-known"
+      },
+      "chain" : [ ],
+      "through_mock" : false,
+      "stand_ins" : [ ],
+      "evidence" : {
+        "grade" : "reaches",
+        "reason" : "host",
+        "found_by" : "test-code",
+        "missed_by_discovery" : false
+      }
+    } ]
+  } ],
+  "not_ordered" : [ {
+    "test" : "com.example.shop.CheckoutIT.checksOut",
+    "why" : "missed-by-discovery"
+  }, {
+    "test" : "com.example.shop.LegacyExportTest.exportsTheDay",
+    "node" : "ftp-server",
+    "why" : "no-node"
+  }, {
+    "test" : "com.example.shop.OrderRepositoryTest.countsOrders",
+    "node" : "orders-db",
+    "why" : "paired"
+  }, {
+    "test" : "com.example.shop.ReportTest.mailsTheReport",
+    "node" : "mail-server",
+    "why" : "may-reach"
+  }, {
+    "test" : "com.example.shop.ShippingTest.quotesAShipment",
+    "node" : "payments-api",
+    "why" : "disabled"
+  }, {
+    "test" : "com.example.shop.StockLevelTest.reservesStock",
+    "why" : "missed-by-discovery"
+  } ]
+}
