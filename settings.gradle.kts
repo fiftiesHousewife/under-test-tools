@@ -5,7 +5,7 @@ pluginManagement {
     }
     plugins {
         // Our code-quality standards: https://github.com/fiftiesHousewife/under-test-java-conventions
-        id("io.github.fiftieshousewife.java-conventions") version "0.2.0"
+        id("io.github.fiftieshousewife.java-conventions") version "0.3.0"
     }
 }
 
