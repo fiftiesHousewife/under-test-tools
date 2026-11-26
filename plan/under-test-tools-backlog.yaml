@@ -21,14 +21,13 @@ items:
     horizon: "now"
     owner_role: "Toolkit Owner"
     done_by: "person"
-    blocked_by:
-      - "decide-how-a-release-is-published"
     done_when:
       - "The repository has the secrets SIGNING_KEY and SIGNING_KEY_PASSWORD, and the key's public half is published"
       - "maintainer-tools/release/release.sh 0.1.0 has run, and the release workflow passed"
       - "The GitHub release v0.1.0 holds the jar, its bill of materials, a signature of each and SHA256SUMS"
       - "under-test's skills that run the tool name 0.1.0"
   - key: "assistants-find-this-repos-skills"
+    status: "done"
     type: "task"
     title: "Claude Code finds this repo's skills: .claude/skills links to each skill in .github/skills"
     parent: "this-repo-keeps-itself-in-order"
@@ -135,17 +134,6 @@ items:
     done_when:
       - "Records what the repo already does"
     decision_record: "docs/decisions/0008-the-code-follows-the-java-conventions-plugins-standards-applied-at-a-pinned-version.md"
-  - key: "decide-how-a-release-is-published"
-    type: "decision"
-    title: "A release is a signed jar, with its bill of materials and checksums, beside a version tag"
-    parent: "this-repo-keeps-itself-in-order"
-    phase: "set-up"
-    horizon: "now"
-    owner_role: "Technical Architect"
-    done_by: "person"
-    done_when:
-      - "Chosen by the under-test-tools maintainers, and the record marked accepted"
-    decision_record: "docs/decisions/0009-a-release-is-a-signed-jar-with-its-bill-of-materials-and-checksums-beside-a-version-tag.md"
   - key: "decide-the-backlog-syncs-to-the-issues"
     type: "decision"
     title: "This repo's backlog is plan/under-test-tools-backlog.yaml, synced to its issues by under-test's shared workflow after each push"
@@ -156,4 +144,4 @@ items:
     done_by: "person"
     done_when:
       - "Chosen by the under-test-tools maintainers, and the record marked accepted"
-    decision_record: "docs/decisions/0010-this-repos-backlog-is-plan-under-test-tools-backlog-yaml-synced-to-its-issues-by-under-tests-shared-workflow-after-each-push.md"
+    decision_record: "docs/decisions/0009-this-repos-backlog-is-plan-under-test-tools-backlog-yaml-synced-to-its-issues-by-under-tests-shared-workflow-after-each-push.md"

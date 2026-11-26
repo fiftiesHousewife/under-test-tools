@@ -173,8 +173,8 @@ standards, and `check` fails on any breach of them
 1. Put the version in `gradle.properties`, and write what's new for users in `docs/releases/<version>.md`. Push both.
 2. Run `maintainer-tools/release/release.sh <version>`. It checks both, then tags main `v<version>` and pushes the tag.
 3. The [release workflow](.github/workflows/release.yml) runs every check, then makes the GitHub release: the jar, its
-   bill of materials, their signatures and checksums. It needs the repository secrets `SIGNING_KEY` and
-   `SIGNING_KEY_PASSWORD` ([decision 0009](docs/decisions/0009-a-release-is-a-signed-jar-with-its-bill-of-materials-and-checksums-beside-a-version-tag.md)).
+   bill of materials, their PGP signatures and checksums. It needs the repository secrets `SIGNING_KEY` (an
+   ASCII-armoured private key) and `SIGNING_KEY_PASSWORD`.
 
 ## Licence
 

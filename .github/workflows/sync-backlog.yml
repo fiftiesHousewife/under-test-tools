@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Brings this repo's GitHub issues up to date with plan/under-test-tools-backlog.yaml after a push that changes it, and
 # commits the refreshed docs/BACKLOG.md. It calls under-test's shared workflow, so every repo of ours uses one importer
-# (docs/decisions/0010).
+# (docs/decisions/0009).
 name: Backlog sync
 on:
   push:

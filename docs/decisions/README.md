@@ -30,5 +30,4 @@ Decisions about the toolkit as a whole, including which steps under-test-tools t
 | Decision | Status | Who decides |
 |---|---|---|
 | [The code follows the java-conventions plugin's standards, applied at a pinned version](0008-the-code-follows-the-java-conventions-plugins-standards-applied-at-a-pinned-version.md) | accepted (records what the repo already does) | under-test-tools maintainers |
-| [A release is a signed jar, with its bill of materials and checksums, beside a version tag](0009-a-release-is-a-signed-jar-with-its-bill-of-materials-and-checksums-beside-a-version-tag.md) | proposed | under-test-tools maintainers |
-| [This repo's backlog is plan/under-test-tools-backlog.yaml, synced to its issues by under-test's shared workflow after each push](0010-this-repos-backlog-is-plan-under-test-tools-backlog-yaml-synced-to-its-issues-by-under-tests-shared-workflow-after-each-push.md) | proposed | under-test-tools maintainers |
+| [This repo's backlog is plan/under-test-tools-backlog.yaml, synced to its issues by under-test's shared workflow after each push](0009-this-repos-backlog-is-plan-under-test-tools-backlog-yaml-synced-to-its-issues-by-under-tests-shared-workflow-after-each-push.md) | proposed | under-test-tools maintainers |
