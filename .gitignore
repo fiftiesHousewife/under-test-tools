@@ -11,6 +11,8 @@ out/
 apm_modules/
 .claude/skills/grilling/
 .claude/skills/architecture-decision-records/
+.agents/skills/grilling/
+.agents/skills/architecture-decision-records/
 # Claude Code (local only)
 .claude/settings.local.json
 .claude/.cc-writes

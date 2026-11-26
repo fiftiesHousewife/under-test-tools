@@ -1,0 +1,233 @@
+lockfile_version: '4'
+apm_version: 0.38.1
+manifest_targets:
+- claude
+- copilot
+dependencies:
+- repo_url: mattpocock/skills
+  name: grilling
+  host: github.com
+  resolved_commit: d1478fcb140db0b93c0c8df17bcfd311844749d0
+  resolved_ref: v1.3.2
+  version: unknown
+  virtual_path: skills/productivity/grilling
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/grilling
+  - .agents/skills/grilling/LICENSE
+  - .agents/skills/grilling/SKILL.md
+  - .agents/skills/grilling/agents/openai.yaml
+  - .claude/skills/grilling
+  - .claude/skills/grilling/LICENSE
+  - .claude/skills/grilling/SKILL.md
+  - .claude/skills/grilling/agents/openai.yaml
+  deployed_file_hashes:
+    .agents/skills/grilling/LICENSE: sha256:0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5
+    .agents/skills/grilling/SKILL.md: sha256:a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2
+    .agents/skills/grilling/agents/openai.yaml: sha256:1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b
+    .claude/skills/grilling/LICENSE: sha256:0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5
+    .claude/skills/grilling/SKILL.md: sha256:a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2
+    .claude/skills/grilling/agents/openai.yaml: sha256:1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b
+  content_hash: sha256:e0e4918ef2675bf3bc0e48fa83c40446cd961c107afdf435cbc2daa774cb0efe
+  carried_licenses:
+  - path: LICENSE
+    source: LICENSE
+    hash: sha256:0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5
+- repo_url: wshobson/agents
+  name: architecture-decision-records
+  host: github.com
+  resolved_commit: 42203085cfc5736204bf0f6d436dff7e1da0bf3f
+  resolved_ref: 42203085cfc5736204bf0f6d436dff7e1da0bf3f
+  version: unknown
+  virtual_path: plugins/documentation-generation/skills/architecture-decision-records
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/architecture-decision-records
+  - .agents/skills/architecture-decision-records/LICENSE
+  - .agents/skills/architecture-decision-records/SKILL.md
+  - .agents/skills/architecture-decision-records/references/decision-templates.md
+  - .agents/skills/architecture-decision-records/references/deprecation-rfc-templates.md
+  - .claude/skills/architecture-decision-records
+  - .claude/skills/architecture-decision-records/LICENSE
+  - .claude/skills/architecture-decision-records/SKILL.md
+  - .claude/skills/architecture-decision-records/references/decision-templates.md
+  - .claude/skills/architecture-decision-records/references/deprecation-rfc-templates.md
+  deployed_file_hashes:
+    .agents/skills/architecture-decision-records/LICENSE: sha256:f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746
+    .agents/skills/architecture-decision-records/SKILL.md: sha256:79059f17da8b20cdf27327f6de0ea005c73c2c442f48f70688abca4c77cb6f8f
+    .agents/skills/architecture-decision-records/references/decision-templates.md: sha256:22cf12aafcad223597451c91c8590f325aad8f1a7c83c1c0690dbfef151f5823
+    .agents/skills/architecture-decision-records/references/deprecation-rfc-templates.md: sha256:942320bdb31f835ffa4eacf009dae4857472056754dbc9478062c9c82d19741d
+    .claude/skills/architecture-decision-records/LICENSE: sha256:f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746
+    .claude/skills/architecture-decision-records/SKILL.md: sha256:79059f17da8b20cdf27327f6de0ea005c73c2c442f48f70688abca4c77cb6f8f
+    .claude/skills/architecture-decision-records/references/decision-templates.md: sha256:22cf12aafcad223597451c91c8590f325aad8f1a7c83c1c0690dbfef151f5823
+    .claude/skills/architecture-decision-records/references/deprecation-rfc-templates.md: sha256:942320bdb31f835ffa4eacf009dae4857472056754dbc9478062c9c82d19741d
+  content_hash: sha256:18eeab7bb6d4015fed29d5b73aa5c54c5160cf19451236be10e996d8a065337c
+  carried_licenses:
+  - path: LICENSE
+    source: LICENSE
+    hash: sha256:f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746
+deployments:
+- kind: project-relative
+  target: claude
+  value: .claude/skills/architecture-decision-records
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/architecture-decision-records/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746
+- kind: project-relative
+  target: claude
+  value: .claude/skills/architecture-decision-records/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:79059f17da8b20cdf27327f6de0ea005c73c2c442f48f70688abca4c77cb6f8f
+- kind: project-relative
+  target: claude
+  value: .claude/skills/architecture-decision-records/references/decision-templates.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:22cf12aafcad223597451c91c8590f325aad8f1a7c83c1c0690dbfef151f5823
+- kind: project-relative
+  target: claude
+  value: .claude/skills/architecture-decision-records/references/deprecation-rfc-templates.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:942320bdb31f835ffa4eacf009dae4857472056754dbc9478062c9c82d19741d
+- kind: project-relative
+  target: claude
+  value: .claude/skills/grilling
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/grilling/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5
+- kind: project-relative
+  target: claude
+  value: .claude/skills/grilling/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2
+- kind: project-relative
+  target: claude
+  value: .claude/skills/grilling/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/architecture-decision-records
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/architecture-decision-records/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/architecture-decision-records/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:79059f17da8b20cdf27327f6de0ea005c73c2c442f48f70688abca4c77cb6f8f
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/architecture-decision-records/references/decision-templates.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:22cf12aafcad223597451c91c8590f325aad8f1a7c83c1c0690dbfef151f5823
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/architecture-decision-records/references/deprecation-rfc-templates.md
+  runtime: null
+  scope: project
+  owners:
+  - wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  active_owner: wshobson/agents/plugins/documentation-generation/skills/architecture-decision-records
+  content_hash: sha256:942320bdb31f835ffa4eacf009dae4857472056754dbc9478062c9c82d19741d
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/grilling
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/grilling/LICENSE
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/grilling/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/grilling/agents/openai.yaml
+  runtime: null
+  scope: project
+  owners:
+  - mattpocock/skills/skills/productivity/grilling
+  active_owner: mattpocock/skills/skills/productivity/grilling
+  content_hash: sha256:1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b
