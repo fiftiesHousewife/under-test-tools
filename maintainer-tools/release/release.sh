@@ -19,6 +19,8 @@ grep -qx "version=$VERSION" gradle.properties \
   || { echo "gradle.properties doesn't say version=$VERSION; change it and push it first" >&2; exit 1; }
 [ -s "docs/releases/$VERSION.md" ] \
   || { echo "docs/releases/$VERSION.md, the release's notes for users, is missing; write it and push it first" >&2; exit 1; }
+git ls-files --error-unmatch KEYS >/dev/null 2>&1 \
+  || { echo "KEYS, the public key users verify against, isn't committed; run maintainer-tools/release/set-up-signing.sh first" >&2; exit 1; }
 [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "Release from main" >&2; exit 1; }
 git diff --quiet && git diff --cached --quiet || { echo "Commit or discard local changes first" >&2; exit 1; }
 git fetch -q origin main

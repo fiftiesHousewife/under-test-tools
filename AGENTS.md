@@ -25,6 +25,7 @@ text, things referred to by name.
 | `.github/workflows/` | `build.yml` (every check, on each push and pull request), `release.yml` (on a version tag), `sync-backlog.yml` |
 | `plan/under-test-tools-backlog.yaml` | This repo's own work, checked by `schema/backlog-seed.schema.json` and synced to its issues; `docs/BACKLOG.md` is generated from them |
 | `maintainer-tools/release/release.sh` | Starts a release: checks it is ready, then pushes its tag |
+| `maintainer-tools/release/set-up-signing.sh`, `KEYS` | Sets up the key releases are signed with, as the secrets `SIGNING_KEY` and `SIGNING_KEY_PASSWORD`; `KEYS` is its public half |
 
 ## Rules for a sub-command
 Each rule is a [decision record](docs/decisions/README.md); the add-a-sub-command skill puts them in order.

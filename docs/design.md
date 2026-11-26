@@ -94,4 +94,5 @@ inputs give the same file whatever order they list things in. Its cases are in
 | `.github/workflows/build.yml` | `check` and `releaseFiles` on each push to main and each pull request |
 | `.github/workflows/release.yml` | On a `v<version>` tag: the build workflow, then signs the release files, writes `SHA256SUMS`, and makes the GitHub release |
 | `maintainer-tools/release/release.sh` | Checks a release is ready, then pushes its tag |
+| `maintainer-tools/release/set-up-signing.sh` | Makes the signing key, or uses one named, sets the two secrets, and writes `KEYS` |
 | `.github/workflows/sync-backlog.yml` | Syncs `plan/under-test-tools-backlog.yaml` to the repo's issues, through under-test's shared workflow |

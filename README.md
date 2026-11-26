@@ -43,6 +43,7 @@ It needs Java 17 or later, and nothing else: PMD and every other library are ins
 
    ```bash
    sha256sum --check --ignore-missing SHA256SUMS
+   curl -sL https://raw.githubusercontent.com/fiftiesHousewife/under-test-tools/main/KEYS | gpg --import
    gpg --verify under-test-tools-<version>.jar.asc under-test-tools-<version>.jar
    ```
 
@@ -174,7 +175,8 @@ standards, and `check` fails on any breach of them
 2. Run `maintainer-tools/release/release.sh <version>`. It checks both, then tags main `v<version>` and pushes the tag.
 3. The [release workflow](.github/workflows/release.yml) runs every check, then makes the GitHub release: the jar, its
    bill of materials, their PGP signatures and checksums. It needs the repository secrets `SIGNING_KEY` (an
-   ASCII-armoured private key) and `SIGNING_KEY_PASSWORD`.
+   ASCII-armoured private key) and `SIGNING_KEY_PASSWORD`. `maintainer-tools/release/set-up-signing.sh` sets both up,
+   and writes the public key to [KEYS](KEYS).
 
 ## Licence
 
